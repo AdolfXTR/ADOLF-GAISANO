@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 
 public class dbConnect {
@@ -36,9 +37,18 @@ public class dbConnect {
             }
             return result;
         }
-
-    public ResultSet getData(String checkQuery) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
         
-}
+        
+        public ResultSet getData(String sql) throws SQLException{
+            Statement stmt = connect.createStatement();
+            ResultSet rst = stmt.executeQuery(sql);
+            return rst;
+        }
+
+       }
+    
+    
+        
+
+
+
