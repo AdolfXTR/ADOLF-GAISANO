@@ -6,8 +6,17 @@
 package guisaint;
 
 import admin.adminDashboard;
+import config.Session;
+import config.dbConnector;
 import java.awt.Color;
-
+import java.security.NoSuchAlgorithmException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+import config.passwordHasher;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import users.usersDashboard;
 /**
  *
  * @author Owner
@@ -23,8 +32,43 @@ public class loginForm extends javax.swing.JFrame {
     
     Color hover = new Color(0,205,51);
     Color defaultcolor = new Color(0,102,0);
-
     
+    static String status;
+    static String type;
+
+     public static boolean loginAcc(String username, String password){
+        dbConnector connector = new dbConnector();
+        try{
+            String query = "SELECT * FROM tbl_users  WHERE u_username = '" + username + "'";
+            ResultSet resultSet = connector.getData(query);
+            if(resultSet.next()){     
+   
+                String hashedPass = resultSet.getString("u_password");
+                String rehashedPass = passwordHasher.hashPassword(password);
+                
+                if(hashedPass.equals(rehashedPass)){        
+                status = resultSet.getString("u_status");   
+                type = resultSet.getString("u_type");
+                Session sess = Session.getInstance();
+                sess.setUid(resultSet.getInt("u_id"));
+                sess.setFname(resultSet.getString("u_fname"));
+                sess.setLname(resultSet.getString("u_lname"));
+                sess.setEmail(resultSet.getString("u_email"));
+                sess.setUsername(resultSet.getString("u_username"));
+                sess.setType(resultSet.getString("u_type"));
+                sess.setStatus(resultSet.getString("u_status"));
+                return true;   
+                }else{
+                return false;
+                }
+        }else{
+            return false;
+        }          
+        }catch (SQLException | NoSuchAlgorithmException ex) {
+            return false;
+        }
+
+    }
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -46,13 +90,13 @@ public class loginForm extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         ext = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        Username = new javax.swing.JTextField();
-        password = new javax.swing.JPasswordField();
+        user = new javax.swing.JTextField();
+        pass = new javax.swing.JPasswordField();
         pazz = new javax.swing.JCheckBox();
         reg = new javax.swing.JLabel();
-        jToggleButton2 = new javax.swing.JToggleButton();
-        jToggleButton3 = new javax.swing.JToggleButton();
         jLabel4 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         jRadioButton1.setText("jRadioButton1");
 
@@ -131,21 +175,21 @@ public class loginForm extends javax.swing.JFrame {
         jLabel2.setText("Password");
         Main.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 210, 90, 40));
 
-        Username.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
-        Username.addActionListener(new java.awt.event.ActionListener() {
+        user.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        user.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                UsernameActionPerformed(evt);
+                userActionPerformed(evt);
             }
         });
-        Main.add(Username, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 160, 300, 50));
+        Main.add(user, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 160, 300, 50));
 
-        password.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
-        password.addActionListener(new java.awt.event.ActionListener() {
+        pass.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        pass.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                passwordActionPerformed(evt);
+                passActionPerformed(evt);
             }
         });
-        Main.add(password, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 250, 300, 50));
+        Main.add(pass, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 250, 300, 50));
 
         pazz.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -161,34 +205,31 @@ public class loginForm extends javax.swing.JFrame {
                 regMouseClicked(evt);
             }
         });
-        Main.add(reg, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 410, -1, -1));
-
-        jToggleButton2.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
-        jToggleButton2.setText("Exit");
-        jToggleButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                med(evt);
-            }
-        });
-        Main.add(jToggleButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 320, 100, 50));
-
-        jToggleButton3.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
-        jToggleButton3.setText("Login");
-        jToggleButton3.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jToggleButton3MouseClicked(evt);
-            }
-        });
-        jToggleButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jToggleButton3ActionPerformed(evt);
-            }
-        });
-        Main.add(jToggleButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 320, 100, 50));
+        Main.add(reg, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 397, -1, 20));
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         jLabel4.setText("Username");
         Main.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 120, 90, 40));
+
+        jButton1.setBackground(new java.awt.Color(0, 102, 102));
+        jButton1.setText("LOGIN");
+        jButton1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        Main.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 330, 80, 30));
+
+        jButton2.setBackground(new java.awt.Color(0, 102, 102));
+        jButton2.setText("EXIT");
+        jButton2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        Main.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 330, 90, 32));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -205,21 +246,21 @@ public class loginForm extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void UsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UsernameActionPerformed
+    private void userActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_UsernameActionPerformed
+    }//GEN-LAST:event_userActionPerformed
 
     private void pazzActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pazzActionPerformed
        
         if(pazz.isSelected())
-            password.setEchoChar((char)0);
+            pass.setEchoChar((char)0);
         else
-            password.setEchoChar('*');
+            pass.setEchoChar('*');
     }//GEN-LAST:event_pazzActionPerformed
 
-    private void passwordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordActionPerformed
+    private void passActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_passwordActionPerformed
+    }//GEN-LAST:event_passActionPerformed
 
     private void regMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_regMouseClicked
         
@@ -229,23 +270,33 @@ public class loginForm extends javax.swing.JFrame {
         
     }//GEN-LAST:event_regMouseClicked
 
-    private void med(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_med
-        // TODO add your handling code here:
-        loginForm lfm = new loginForm();
-        lfm.setVisible(true);
-        this.dispose();
-    }//GEN-LAST:event_med
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        if(loginAcc(user.getText(),pass.getText())){
+            if(!status.equals("Active")){
+                JOptionPane.showMessageDialog(null, "In-Active Account, Contact the Admin!");
+            }else{
+                if(type.equals("Admin")){
+                    JOptionPane.showMessageDialog(null, "Login Success!");
+                    adminDashboard ads = new adminDashboard();
+                    ads.setVisible(true);
+                    this.dispose();
+                }else if(type.equals("User")){
+                    JOptionPane.showMessageDialog(null, "Login Success!");
+                    usersDashboard usd = new usersDashboard();
+                    usd.setVisible(true);
+                    this.dispose();
+                }else{
+                    JOptionPane.showMessageDialog(null, "No account type found, Contact the Admin!");
+                }
+            }
+        }else{
+            JOptionPane.showMessageDialog(null, "Invalid Account!");
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jToggleButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton3MouseClicked
-         adminDashboard adm = new adminDashboard();
-     adm.setVisible(true); 
-     this.dispose();
-                                        
-    }//GEN-LAST:event_jToggleButton3MouseClicked
-
-    private void jToggleButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jToggleButton3ActionPerformed
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -286,8 +337,9 @@ public class loginForm extends javax.swing.JFrame {
     private javax.swing.JPanel Left;
     private javax.swing.JPanel Main;
     private javax.swing.JPanel Right;
-    private javax.swing.JTextField Username;
     private javax.swing.JLabel ext;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -296,10 +348,9 @@ public class loginForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JToggleButton jToggleButton2;
-    private javax.swing.JToggleButton jToggleButton3;
-    private javax.swing.JPasswordField password;
+    private javax.swing.JPasswordField pass;
     private javax.swing.JCheckBox pazz;
     private javax.swing.JLabel reg;
+    private javax.swing.JTextField user;
     // End of variables declaration//GEN-END:variables
 }

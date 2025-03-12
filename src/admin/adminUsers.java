@@ -1,7 +1,7 @@
 
 package admin;
 
-import config.dbConnect;
+import config.dbConnector;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import net.proteanit.sql.DbUtils;
@@ -17,7 +17,7 @@ public class adminUsers extends javax.swing.JFrame {
 
   public void displayData(){
         try{
-            dbConnect dbc = new dbConnect();
+            dbConnector dbc = new dbConnector();
             ResultSet rs = dbc.getData("SELECT u_name, u_lname, u_contact, u_type, u_email, status   FROM tabl_users");
             student_table.setModel(DbUtils.resultSetToTableModel(rs));
              rs.close();
