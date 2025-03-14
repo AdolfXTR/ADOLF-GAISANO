@@ -87,9 +87,9 @@ public class adminDashboard extends javax.swing.JFrame {
 
         jLabel10.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel10.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel10.setText("CUSTOMER");
+        jLabel10.setText("USERS");
         r_name.add(jLabel10);
-        jLabel10.setBounds(10, 80, 90, 20);
+        jLabel10.setBounds(20, 80, 60, 20);
 
         jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/admin/vz.png"))); // NOI18N

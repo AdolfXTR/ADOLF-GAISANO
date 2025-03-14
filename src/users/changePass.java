@@ -10,6 +10,8 @@ import config.dbConnector;
 import config.passwordHasher;
 import guisaint.loginForm;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.JOptionPane;
@@ -44,12 +46,12 @@ public class changePass extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         oldpass = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
-        newpass = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
-        conpass = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
+        newPassword = new javax.swing.JPasswordField();
+        Cpassword = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -95,12 +97,10 @@ public class changePass extends javax.swing.JFrame {
         jLabel9.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel9.setText("ENTER NEW PASS:");
         jPanel3.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 90, -1, -1));
-        jPanel3.add(newpass, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 112, 190, 40));
 
         jLabel11.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel11.setText("CONFIRM PASS:");
         jPanel3.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 160, -1, -1));
-        jPanel3.add(conpass, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 190, 190, 40));
 
         jButton2.setBackground(new java.awt.Color(0, 102, 102));
         jButton2.setText("BACK");
@@ -130,6 +130,8 @@ public class changePass extends javax.swing.JFrame {
             }
         });
         jPanel3.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 280, -1, -1));
+        jPanel3.add(newPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 120, 190, 40));
+        jPanel3.add(Cpassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 190, 190, 50));
 
         getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 120, 590, 340));
 
@@ -154,33 +156,71 @@ public class changePass extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+       String passw = new String(newPassword.getPassword()).trim();
+       String Cpassw = new String(Cpassword.getPassword()).trim();
+       String oldPassInput = oldpass.getText().trim();
+ // Use this for JPasswordField
 
-        try{
-            dbConnector dbc = new dbConnector();
-            Session sess = Session.getInstance();
 
-            String query = "SELECT * FROM tbl_users WHERE u_id = '"+sess.getUid()+"'";
-            ResultSet rs = dbc.getData(query);
-            if(rs.next()){
-                String olddbpass = rs.getString("u_password");
-                String oldhash = passwordHasher.hashPassword(oldpass.getText());
+if (passw.isEmpty() || Cpassw.isEmpty() || oldPassInput.isEmpty()) {
+    JOptionPane.showMessageDialog(null, "Please fill all fields");
+} else if (passw.length() < 8) {
+    JOptionPane.showMessageDialog(null, "Password must be at least 8 characters long");
+} else if (!passw.equals(Cpassw)) {
+    JOptionPane.showMessageDialog(null, "New password does not match confirmation password");
+} else {
+    try {
+        dbConnector dbc = new dbConnector();
+        Session sess = Session.getInstance();
 
-                if(olddbpass.equals(oldhash)){
-                    String npass = passwordHasher.hashPassword(newpass.getText());
-                    dbc.updateData("UPDATE tbl_users SET u_password = '"+npass+"'");
-                    JOptionPane.showMessageDialog(null, "Successfully Updated!");
-                    loginForm lg = new loginForm();
-                    lg.setVisible(true);
-                    this.dispose();
-                }else{
-                    JOptionPane.showMessageDialog(null, "Old Password is Incorrect!");
+        String query = "SELECT u_pass FROM tbl_accounts WHERE u_id = ?";
+        try (Connection conn = dbc.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+
+            pst.setInt(1, sess.getUid());
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                String olddbPassword = rs.getString("u_pass");
+                String oldhash = passwordHasher.hashPassword(oldPassInput);
+                String newhash = passwordHasher.hashPassword(passw);
+
+                // Check if the old password matches the stored one
+                if (!olddbPassword.equals(oldhash)) {
+                    JOptionPane.showMessageDialog(null, "Old password is incorrect");
+                    return;
                 }
-            }
-        }catch(SQLException | NoSuchAlgorithmException ex){
-            System.out.println(""+ex);
-        }
-    }//GEN-LAST:event_jButton1ActionPerformed
 
+                // Prevent user from reusing the old password
+                if (olddbPassword.equals(newhash)) {
+                    JOptionPane.showMessageDialog(null, "New password must be different from the old password");
+                    return;
+                }
+
+                // Update the password
+                String updateQuery = "UPDATE tbl_accounts SET u_pass = ? WHERE u_id = ?";
+                try (PreparedStatement updatePst = conn.prepareStatement(updateQuery)) {
+                    updatePst.setString(1, newhash);
+                    updatePst.setInt(2, sess.getUid());
+
+                    int updated = updatePst.executeUpdate();
+                    if (updated > 0) {
+                        JOptionPane.showMessageDialog(null, "Password updated successfully");
+                        new usersDashboard().setVisible(true);
+                        this.dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Password update failed");
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "User not found");
+            }
+        }
+    } catch (SQLException | NoSuchAlgorithmException ex) {
+        JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    }//GEN-LAST:event_jButton1ActionPerformed
+    }
     private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
        Session sess = Session.getInstance();
         iddisplay.setText("USER ID: "+sess.getUid());        // TODO add your handling code here:
@@ -222,7 +262,7 @@ public class changePass extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField conpass;
+    private javax.swing.JPasswordField Cpassword;
     private javax.swing.JLabel iddisplay;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
@@ -234,7 +274,7 @@ public class changePass extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JTextField newpass;
+    private javax.swing.JPasswordField newPassword;
     private javax.swing.JTextField oldpass;
     // End of variables declaration//GEN-END:variables
 }

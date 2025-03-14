@@ -287,36 +287,35 @@ public class registrationForm extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
 
-        if(fn.getText().isEmpty()|| ln.getText().isEmpty()||em.getText().isEmpty()||un.getText().isEmpty()||
-            ps.getText().isEmpty()){
-            JOptionPane.showMessageDialog(null, "All fields are required!");
-        }else if(ps.getText().length() <8){
-            JOptionPane.showMessageDialog(null, "Password character should be 8 and above");
-            ps.setText("");
-        }else if(duplicateCheck()){
-            System.out.println("Duplicate Exist!");
-        }else{
-            dbConnector dbc = new dbConnector();
-            try{
-                String pass = passwordHasher.hashPassword(ps.getText());
-                String imagePath = "uploads/" + un.getText() + ".jpg";
+   
+       if(fn.getText().isEmpty() || ln.getText().isEmpty() || em.getText().isEmpty() || un.getText().isEmpty() || 
+   ps.getText().isEmpty()) {
+    JOptionPane.showMessageDialog(null, "All fields are required!");   
+} else if(ps.getText().length() < 8) {
+    JOptionPane.showMessageDialog(null, "Password character should be 8 and above");
+    ps.setText("");
+} else if(duplicateCheck()) {
+    System.out.println("Duplicate Exist!");
+} else {
+    dbConnector dbc = new dbConnector();
+    try {
+        String pass = passwordHasher.hashPassword(ps.getText());
 
-                if(dbc.insertData("INSERT INTO tbl_users (u_fname, u_lname, u_email, u_username, u_password, u_type, u_status, u_image) "
-                    + "VALUES ('"+fn.getText()+"','"+ln.getText()+"','"+em.getText()+"','"+un.getText()+"','"+pass+"','"+ut.getSelectedItem()+"','Pending','" + imagePath + "')"))
-            {
-                JOptionPane.showMessageDialog(null, "Inserted Success!");
-                loginForm lfr = new loginForm();
-                lfr.setVisible(true);
-                this.dispose();
-            }else{
-                JOptionPane.showMessageDialog(null, "Connection Error!");
-            }
-        }catch(NoSuchAlgorithmException ex){
-            System.out.println(""+ex);
-        }
-        }
+        if(dbc.insertData("INSERT INTO tbl_users (u_fname, u_lname, u_email, u_username, u_password, u_type, u_status) "
+                + "VALUES ('" + fn.getText() + "','" + ln.getText() + "','" + em.getText() + "','" + un.getText() + "','" + pass + "','" + ut.getSelectedItem() + "','Pending')")) 
+        {
+            JOptionPane.showMessageDialog(null, "Inserted Success!");
+            loginForm lfr = new loginForm();
+            lfr.setVisible(true);
+            this.dispose();
+        } else {
+            JOptionPane.showMessageDialog(null, "Connection Error!");      
+        }     
+    } catch(NoSuchAlgorithmException ex) {
+        System.out.println("" + ex);
+    }
     }//GEN-LAST:event_jButton3ActionPerformed
-
+    }
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
         loginForm ads = new loginForm();
         ads.setVisible(true);

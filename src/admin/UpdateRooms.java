@@ -57,8 +57,6 @@ public class UpdateRooms extends javax.swing.JFrame {
         aa = new javax.swing.JLabel();
         acc_id = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        roomTable = new javax.swing.JTable();
         adds = new javax.swing.JButton();
         update = new javax.swing.JButton();
         clear = new javax.swing.JButton();
@@ -73,6 +71,9 @@ public class UpdateRooms extends javax.swing.JFrame {
         rp = new javax.swing.JTextField();
         cprice2 = new javax.swing.JLabel();
         quantity = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        roomTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -134,23 +135,6 @@ public class UpdateRooms extends javax.swing.JFrame {
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        roomTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-
-            }
-        ));
-        roomTable.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                roomTableMouseClicked(evt);
-            }
-        });
-        jScrollPane1.setViewportView(roomTable);
-
-        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 210, 370));
 
         adds.setBackground(new java.awt.Color(0, 102, 102));
         adds.setText("ADD");
@@ -231,6 +215,25 @@ public class UpdateRooms extends javax.swing.JFrame {
         jPanel2.add(cprice2, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 210, -1, -1));
         jPanel2.add(quantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 210, 170, 30));
 
+        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
+        jLabel6.setText("COMING SOON");
+        jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 50, 380, 290));
+
+        roomTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(roomTable);
+
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 210, 370));
+
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 130, 590, 400));
 
         pack();
@@ -239,33 +242,6 @@ public class UpdateRooms extends javax.swing.JFrame {
     private void acc_name1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_acc_name1MouseClicked
         // TODO add your handling code here:
     }//GEN-LAST:event_acc_name1MouseClicked
-
-    private void roomTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_roomTableMouseClicked
-        int rowIndex = roomTable.getSelectedRow();
-
-        if(rowIndex < 0){
-            JOptionPane.showMessageDialog(null, "Please Select an Item!");
-        }else{
-            try{
-                dbConnector dbc = new dbConnector();
-                TableModel tbl = roomTable.getModel();
-                ResultSet rs = dbc.getData("SELECT * FROM tbl_room WHERE r_id = '"+tbl.getValueAt(rowIndex, 0)+"'");
-                if(rs.next()){
-
-                    rid.setText(""+rs.getString("r_id"));
-                    rclass.setText(""+rs.getString("r_class"));
-                    rp.setText(""+rs.getString("r_price"));
-                    rstat.setSelectedItem(""+rs.getString("c_status"));
-                    adds.setEnabled(false);
-                    adds.setForeground(red);
-                    boolean checkadd = false;
-
-                }
-            }catch(SQLException ex){
-                System.out.println(""+ex);
-            }
-        }
-    }//GEN-LAST:event_roomTableMouseClicked
 
     private void addsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addsActionPerformed
         boolean checkadd = false;
@@ -459,6 +435,7 @@ public class UpdateRooms extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;

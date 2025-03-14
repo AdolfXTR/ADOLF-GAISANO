@@ -9,67 +9,65 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import javax.swing.JOptionPane;
 
-
 public class dbConnector {
-    
+    private static final String URL = "jdbc:mysql://localhost:3306/hotel_management";  // Change DB name if necessary
+    private static final String USER = "root";
+    private static final String PASSWORD = "";
+
     private Connection connect;
-    
-   private String url = "jdbc:mysql://localhost:3306/hotelmanagement_db";
-   private String user = "root";
-   private String password = "";
 
-
-       public dbConnector() {
+    // Constructor to establish the database connection
+    public dbConnector() {
         try {
-            connect = DriverManager.getConnection("jdbc:mysql://localhost:3306/hotelmanagement_db", "root", "");
-            System.out.println("Database Connected!");
-        } catch (SQLException e) {
-            System.out.println("Can't connect to database: " + e.getMessage());
+            connect = DriverManager.getConnection(URL, USER, PASSWORD);
+            System.out.println("Database connected successfully!");
+        } catch (SQLException ex) {
+            System.out.println("Can't connect to database: " + ex.getMessage());
         }
     }
-        
-        //Function to save data
-        public boolean insertData(String query) {
-    try {
+
+    // Provide a public method to get the connection
+    public Connection getConnection() {
+        return connect;
+    }
+
+    // Function to retrieve data
+    public ResultSet getData(String sql) throws SQLException {
         Statement stmt = connect.createStatement();
-        int rowsAffected = stmt.executeUpdate(query);
-        return rowsAffected > 0; // Return true if at least one row is inserted
-    } catch (SQLException ex) {
-        System.out.println("SQL Insert Error: " + ex);
-        return false;
+        return stmt.executeQuery(sql);
+    }
+
+    // Function to insert data
+    public boolean insertData(String sql) {
+        try (PreparedStatement pst = connect.prepareStatement(sql)) {
+            pst.executeUpdate();
+            System.out.println("Inserted Successfully!");
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Connection Error: " + ex);
+            return false;
+        }
+    }
+
+    // Function to update data
+    public boolean updateData(String sql) {
+        try (PreparedStatement pst = connect.prepareStatement(sql)) {
+            int rowsUpdated = pst.executeUpdate();
+            if (rowsUpdated > 0) {
+                JOptionPane.showMessageDialog(null, "Data Updated Successfully!");
+                return true;
+            } else {
+                System.out.println("Data Update Failed!");
+                return false;
+            }
+        } catch (SQLException ex) {
+            System.out.println("Connection Error: " + ex);
+            return false;
+        }
     }
 }
 
-        
-        
-       public ResultSet getData(String query) {
-        try {
-            Statement stmt = connect.createStatement();
-            return stmt.executeQuery(query);
-        } catch (SQLException e) {
-            System.out.println("SQL Query Error: " + e.getMessage());
-            return null;
-        }
-    }
-
-    public void updateData(String sql){
-            try{
-                PreparedStatement pst = connect.prepareStatement(sql);
-                    int rowsUpdated = pst.executeUpdate();
-                        if(rowsUpdated > 0){
-                            JOptionPane.showMessageDialog(null, "Data Updated Successfully!");
-                        }else{
-                            System.out.println("Data Update Failed!");
-                        }
-                        pst.close();
-            }catch(SQLException ex){
-                System.out.println("Connection Error: "+ex);
-            }
-        
-        }
-
-       }
-    
+       
     
         
 
