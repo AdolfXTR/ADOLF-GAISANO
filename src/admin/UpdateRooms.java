@@ -5,7 +5,9 @@
  */
 package admin;
 
+import config.Session;
 import config.dbConnector;
+import guisaint.loginForm;
 import static java.awt.Color.red;
 import java.io.File;
 import java.sql.Connection;
@@ -15,6 +17,7 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import net.proteanit.sql.DbUtils;
 import users.usersDashboard;
 
 /**
@@ -29,6 +32,7 @@ public class UpdateRooms extends javax.swing.JFrame {
      */
     public UpdateRooms() {
         initComponents();
+        roomData();
     }
     Connection connect = null;
         PreparedStatement ps = null;
@@ -39,6 +43,21 @@ public class UpdateRooms extends javax.swing.JFrame {
         File selectedFile;
         public String oldpath;
         public String path;
+        
+     
+          
+     public void roomData(){
+        try{
+            dbConnector dbc = new dbConnector();
+            ResultSet rs = dbc.getData("SELECT r_id,r_class,r_price,r_status FROM tbl_room");
+            roomupdate.setModel(DbUtils.resultSetToTableModel(rs));
+             rs.close();
+        }catch(SQLException ex){
+            System.out.println("Errors: "+ex.getMessage());
+        
+        }
+       
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -69,13 +88,15 @@ public class UpdateRooms extends javax.swing.JFrame {
         rid = new javax.swing.JTextField();
         rclass = new javax.swing.JTextField();
         rp = new javax.swing.JTextField();
-        cprice2 = new javax.swing.JLabel();
-        quantity = new javax.swing.JTextField();
-        jLabel6 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        roomTable = new javax.swing.JTable();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        roomupdate = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowActivated(java.awt.event.WindowEvent evt) {
+                formWindowActivated(evt);
+            }
+        });
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel3.setBackground(new java.awt.Color(0, 102, 102));
@@ -95,9 +116,9 @@ public class UpdateRooms extends javax.swing.JFrame {
                 jLabel1MouseClicked(evt);
             }
         });
-        jPanel3.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 50, 40, -1));
+        jPanel3.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(950, 10, 40, -1));
 
-        getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 740, 120));
+        getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 120));
 
         jPanel1.setBackground(new java.awt.Color(0, 102, 102));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -131,22 +152,29 @@ public class UpdateRooms extends javax.swing.JFrame {
         acc_id.setText("ID");
         jPanel1.add(acc_id, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 350, -1, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 130, 130, 410));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 130, 130, 430));
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         adds.setBackground(new java.awt.Color(0, 102, 102));
+        adds.setFont(new java.awt.Font("Arial Black", 1, 15)); // NOI18N
         adds.setText("ADD");
         adds.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        adds.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                addsMouseClicked(evt);
+            }
+        });
         adds.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addsActionPerformed(evt);
             }
         });
-        jPanel2.add(adds, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 40, 70, -1));
+        jPanel2.add(adds, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 130, 130, 40));
 
         update.setBackground(new java.awt.Color(0, 102, 102));
+        update.setFont(new java.awt.Font("Arial Black", 1, 15)); // NOI18N
         update.setText("UPDATE");
         update.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         update.addActionListener(new java.awt.event.ActionListener() {
@@ -154,9 +182,10 @@ public class UpdateRooms extends javax.swing.JFrame {
                 updateActionPerformed(evt);
             }
         });
-        jPanel2.add(update, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 40, 70, -1));
+        jPanel2.add(update, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 130, 130, 40));
 
         clear.setBackground(new java.awt.Color(0, 102, 102));
+        clear.setFont(new java.awt.Font("Arial Black", 1, 15)); // NOI18N
         clear.setText("CLEAR");
         clear.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         clear.addActionListener(new java.awt.event.ActionListener() {
@@ -164,9 +193,10 @@ public class UpdateRooms extends javax.swing.JFrame {
                 clearActionPerformed(evt);
             }
         });
-        jPanel2.add(clear, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 40, 70, -1));
+        jPanel2.add(clear, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 130, 130, 40));
 
         delete.setBackground(new java.awt.Color(0, 102, 102));
+        delete.setFont(new java.awt.Font("Arial Black", 1, 15)); // NOI18N
         delete.setText("DELETE");
         delete.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         delete.addActionListener(new java.awt.event.ActionListener() {
@@ -174,23 +204,23 @@ public class UpdateRooms extends javax.swing.JFrame {
                 deleteActionPerformed(evt);
             }
         });
-        jPanel2.add(delete, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 40, 80, -1));
+        jPanel2.add(delete, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 130, 140, 40));
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel2.setText("Room ID:");
-        jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 90, -1, -1));
+        jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, -1, -1));
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabel3.setText("Room Class:");
-        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 130, -1, -1));
+        jLabel3.setText("Room Type : ");
+        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 20, -1, -1));
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel4.setText("Room Price:");
-        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 170, -1, -1));
+        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 20, -1, -1));
 
         jLabel7.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel7.setText("User Status:");
-        jPanel2.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 280, -1, -1));
+        jPanel2.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, -1, -1));
 
         rstat.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Available", "Out of Stock" }));
         rstat.addActionListener(new java.awt.event.ActionListener() {
@@ -198,7 +228,7 @@ public class UpdateRooms extends javax.swing.JFrame {
                 rstatActionPerformed(evt);
             }
         });
-        jPanel2.add(rstat, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 270, -1, 40));
+        jPanel2.add(rstat, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 70, -1, 40));
 
         rid.setEnabled(false);
         rid.addActionListener(new java.awt.event.ActionListener() {
@@ -206,20 +236,11 @@ public class UpdateRooms extends javax.swing.JFrame {
                 ridActionPerformed(evt);
             }
         });
-        jPanel2.add(rid, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 80, 160, 30));
-        jPanel2.add(rclass, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 120, 160, 30));
-        jPanel2.add(rp, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 160, 160, 30));
+        jPanel2.add(rid, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 10, 130, 30));
+        jPanel2.add(rclass, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 10, 160, 30));
+        jPanel2.add(rp, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 10, 160, 30));
 
-        cprice2.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        cprice2.setText("Change Quantity:");
-        jPanel2.add(cprice2, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 210, -1, -1));
-        jPanel2.add(quantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 210, 170, 30));
-
-        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
-        jLabel6.setText("COMING SOON");
-        jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 50, 380, 290));
-
-        roomTable.setModel(new javax.swing.table.DefaultTableModel(
+        roomupdate.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -230,13 +251,14 @@ public class UpdateRooms extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(roomTable);
+        jScrollPane2.setViewportView(roomupdate);
 
-        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 210, 370));
+        jPanel2.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 187, 830, 230));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 130, 590, 400));
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 120, 870, 440));
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void acc_name1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_acc_name1MouseClicked
@@ -244,101 +266,104 @@ public class UpdateRooms extends javax.swing.JFrame {
     }//GEN-LAST:event_acc_name1MouseClicked
 
     private void addsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addsActionPerformed
-        boolean checkadd = false;
-        if (checkadd) {
-            if (rclass.getText().isEmpty() || rp.getText().isEmpty() || quantity.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(null, "All fields including quantity are required!");
-            } else {
-                dbConnector dbc = new dbConnector();
-                dbc.insertData("INSERT INTO tbl_room (r_class, r_price, r_status, r_image, r_quantity) VALUES ('" + rclass.getText() + "','" + rp.getText() + "','" + rstat.getSelectedItem() + "','', '" + quantity.getText() + "')");
-                JOptionPane.showMessageDialog(null, "Successfully Added!");
-                displayData();
-                checkadd = true;
-                rid.setText("");
-                rclass.setText("");
-                rp.setText("");
-                rstat.setSelectedIndex(0);
-                quantity.setText(""); // Clear quantity field after insertion
-            }
+    
+    boolean checkadd = true;
+
+    if (checkadd) {
+        if (rclass.getText().isEmpty() || rp.getText().isEmpty() || rstat.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(null, "All fields except r_id are required!");
         } else {
-            JOptionPane.showMessageDialog(null, "Clear the field first!");
+            try {
+                dbConnector dbc = new dbConnector();
+                String rClassValue = rclass.getText();
+                String rpValue = rp.getText();
+                String rStatusValue = rstat.getSelectedItem().toString();
+
+                String sql = "INSERT INTO tbl_room (r_class, r_price, r_status) VALUES (?, ?, ?)"; // r_id is auto-incremented
+
+                java.sql.PreparedStatement pstmt = dbc.getConnection().prepareStatement(sql);
+                pstmt.setString(1, rClassValue);
+                pstmt.setString(2, rpValue);
+                pstmt.setString(3, rStatusValue);
+
+                int rowsAffected = pstmt.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    JOptionPane.showMessageDialog(null, "Successfully Added!");
+                    checkadd = false;
+
+                    rclass.setText("");
+                    rp.setText("");
+                    rstat.setSelectedIndex(0);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Failed to add room. Check database.");
+                }
+
+                pstmt.close();
+                dbc.closeConnection();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error adding data: " + ex.getMessage());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "An unexpected error occurred: " + ex.getMessage());
+            }
         }
+    } else {
+        JOptionPane.showMessageDialog(null, "Clear the field first!");
+    }
+
     }//GEN-LAST:event_addsActionPerformed
 
     private void updateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateActionPerformed
-        // Ensure destination and oldpath are initialized with default values
-        String defaultPath = "src/usersimages/";
-        if (destination == null || destination.isEmpty()) {
-            destination = defaultPath;
-        }
-
-        if (oldpath == null || oldpath.isEmpty()) {
-            oldpath = defaultPath;
-        }
-
-        if (rid.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Please select a room first!");
+          if (rid.getText().isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Please select a room first!");
+    } else {
+        if (rclass.getText().isEmpty() || rp.getText().isEmpty() || rstat.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(null, "r_class, r_price, and r_status fields are required!");
         } else {
-            if (rclass.getText().isEmpty() || rp.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(null, "r_class, c_price fields are required!");
-            } else {
+            try {
                 dbConnector dbc = new dbConnector();
 
-                // Retrieve the current quantity and image path from the database
-                int currentQty = 0;
-                String existingImagePath = "";
-                try {
-                    ResultSet rs = dbc.getData("SELECT r_quantity, r_image FROM tbl_room WHERE r_id = '" + rid.getText() + "'");
-                    if (rs.next()) {
-                        currentQty = rs.getInt("quantity");
-                        existingImagePath = rs.getString("r_image");
-                    }
-                    rs.close();
-                } catch (SQLException ex) {
-                    System.err.println("Error retrieving current quantity and image path: " + ex.getMessage());
+                String rClassValue = rclass.getText();
+                String rpValue = rp.getText();
+                String rStatusValue = rstat.getSelectedItem().toString();
+                String ridValue = rid.getText();
+
+                String sql = "UPDATE tbl_room SET r_class = ?, r_price = ?, r_status = ? WHERE r_id = ?";
+
+                java.sql.PreparedStatement pstmt = dbc.getConnection().prepareStatement(sql);
+                pstmt.setString(1, rClassValue);
+                pstmt.setString(2, rpValue);
+                pstmt.setString(3, rStatusValue);
+                pstmt.setString(4, ridValue);
+
+                int rowsAffected = pstmt.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    JOptionPane.showMessageDialog(null, "Room details updated successfully!");
+                    
+
+                    adminDashboard ad = new adminDashboard();
+                    ad.setVisible(true);
+                    this.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Failed to update room details. Room ID may not exist.");
                 }
 
-                // Determine the c_status based on quantity
-                String status;
-                int qty = currentQty;
-                if (!quantity.getText().isEmpty()) {
-                    qty = Integer.parseInt(quantity.getText());
-                }
-                status = (qty < 1) ? "Out of Stock" : "Available";
+                pstmt.close();
+                dbc.closeConnection();
 
-                // Define the c_image value
-                String r_image = existingImagePath;
-
-                // Construct the SQL update query
-                StringBuilder updateQuery = new StringBuilder("UPDATE tbl_room SET ");
-                updateQuery.append("r_class = '").append(rclass.getText()).append("', ");
-                updateQuery.append("r_price = '").append(rp.getText()).append("', ");
-                updateQuery.append("r_status = '").append(status).append("', ");
-                updateQuery.append("r_image = '").append(r_image).append("'");
-
-                // Only update quantity if it's not empty
-                if (!quantity.getText().isEmpty()) {
-                    updateQuery.append(", quantity = '").append(quantity.getText()).append("'");
-                }
-
-                updateQuery.append(" WHERE c_id = '").append(rid.getText()).append("'");
-
-                // Execute the update query
-                dbc.updateData(updateQuery.toString());
-
-                displayData();
-                boolean checkadd = true;
-                rid.setText("");
-                rclass.setText("");
-                rp.setText("");
-                quantity.setText("");
-                rstat.setSelectedIndex(0);
-
-                adminDashboard ad = new adminDashboard();
-                ad.setVisible(true);
-                this.dispose();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error updating room details: " + ex.getMessage());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "An unexpected error occurred: " + ex.getMessage());
             }
         }
+    }
+
     }//GEN-LAST:event_updateActionPerformed
 
     private void clearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearActionPerformed
@@ -351,25 +376,8 @@ public class UpdateRooms extends javax.swing.JFrame {
     }//GEN-LAST:event_clearActionPerformed
 
     private void deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteActionPerformed
-        int selectedRow = roomTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(null, "Please select a row to delete!");
-            return; // Exit the method if no row is selected
-        }
-
-        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this record?", "Confirmation", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            String carIdToDelete = roomTable.getValueAt(selectedRow, 0).toString(); // Assuming the first column contains the car ID
-            dbConnector dbc = new dbConnector();
-            String deleteQuery = "DELETE FROM tbl_cars WHERE c_id = '" + carIdToDelete + "'";
-            dbc.updateData(deleteQuery);
-
-            // Remove the selected row from the table
-            DefaultTableModel model = (DefaultTableModel) roomTable.getModel();
-            model.removeRow(selectedRow);
-
-            JOptionPane.showMessageDialog(null, "Record deleted successfully!");
-        }
+      
+        
     }//GEN-LAST:event_deleteActionPerformed
 
     private void rstatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rstatActionPerformed
@@ -385,6 +393,21 @@ public class UpdateRooms extends javax.swing.JFrame {
         ads.setVisible(true);
         this.dispose();        // TODO add your handling code here:
     }//GEN-LAST:event_jLabel1MouseClicked
+
+    private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
+        Session sess = Session.getInstance();
+        if(sess.getUid() == 0){
+            JOptionPane.showMessageDialog(null, "No account, Login First!"); 
+           loginForm lf = new loginForm();
+           lf.setVisible(true);
+           this.dispose();
+        }
+        rid.setText(""+sess.getUid()); 
+    }//GEN-LAST:event_formWindowActivated
+
+    private void addsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_addsMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_addsMouseClicked
 
     /**
      * @param args the command line arguments
@@ -427,7 +450,6 @@ public class UpdateRooms extends javax.swing.JFrame {
     private javax.swing.JLabel acc_name1;
     private javax.swing.JButton adds;
     private javax.swing.JButton clear;
-    private javax.swing.JLabel cprice2;
     private javax.swing.JButton delete;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
@@ -435,22 +457,18 @@ public class UpdateRooms extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JScrollPane jScrollPane1;
-    public javax.swing.JTextField quantity;
+    private javax.swing.JScrollPane jScrollPane2;
     public javax.swing.JTextField rclass;
     public javax.swing.JTextField rid;
-    private javax.swing.JTable roomTable;
+    private javax.swing.JTable roomupdate;
     public javax.swing.JTextField rp;
     public javax.swing.JComboBox<String> rstat;
     private javax.swing.JButton update;
     // End of variables declaration//GEN-END:variables
 
-    private void displayData() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+   
 }

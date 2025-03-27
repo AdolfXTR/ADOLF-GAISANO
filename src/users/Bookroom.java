@@ -30,7 +30,7 @@ public class Bookroom extends javax.swing.JFrame {
         try{
             dbConnector dbc = new dbConnector();
             ResultSet rs = dbc.getData("SELECT r_id, r_class, r_price, r_status FROM tbl_room");
-            oTable.setModel(DbUtils.resultSetToTableModel(rs));
+            roomtable.setModel(DbUtils.resultSetToTableModel(rs));
              rs.close();
         }catch(SQLException ex){
             System.out.println("Errors: "+ex.getMessage());
@@ -52,9 +52,17 @@ public class Bookroom extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        oTable = new javax.swing.JTable();
+        roomtable = new javax.swing.JTable();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
+        rid = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        rclass = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        rp = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        rstat = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -78,12 +86,12 @@ public class Bookroom extends javax.swing.JFrame {
         });
         jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 50, -1, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 700, 120));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 880, 120));
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        oTable.setModel(new javax.swing.table.DefaultTableModel(
+        roomtable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -91,15 +99,15 @@ public class Bookroom extends javax.swing.JFrame {
 
             }
         ));
-        oTable.setRowSelectionAllowed(false);
-        oTable.addMouseListener(new java.awt.event.MouseAdapter() {
+        roomtable.setRowSelectionAllowed(false);
+        roomtable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                oTableMouseClicked(evt);
+                roomtableMouseClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(oTable);
+        jScrollPane1.setViewportView(roomtable);
 
-        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 50, 620, 330));
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 130, 800, 250));
 
         jButton4.setBackground(new java.awt.Color(0, 102, 102));
         jButton4.setText("SELECT");
@@ -109,7 +117,7 @@ public class Bookroom extends javax.swing.JFrame {
                 jButton4ActionPerformed(evt);
             }
         });
-        jPanel2.add(jButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 20, 80, -1));
+        jPanel2.add(jButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 60, 80, -1));
 
         jButton5.setBackground(new java.awt.Color(0, 102, 102));
         jButton5.setText("CANCEL");
@@ -119,9 +127,43 @@ public class Bookroom extends javax.swing.JFrame {
                 jButton5ActionPerformed(evt);
             }
         });
-        jPanel2.add(jButton5, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 20, 80, -1));
+        jPanel2.add(jButton5, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 60, 80, -1));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 660, 400));
+        rid.setEnabled(false);
+        rid.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ridActionPerformed(evt);
+            }
+        });
+        jPanel2.add(rid, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 10, 130, 30));
+
+        jLabel3.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabel3.setText("Room ID:");
+        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, -1, -1));
+
+        jLabel4.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabel4.setText("Room Type : ");
+        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 20, -1, -1));
+        jPanel2.add(rclass, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 10, 160, 30));
+
+        jLabel6.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabel6.setText("Room Price:");
+        jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 20, -1, -1));
+        jPanel2.add(rp, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 10, 160, 30));
+
+        jLabel7.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel7.setText("User Status:");
+        jPanel2.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, -1, -1));
+
+        rstat.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Available", "Out of Stock" }));
+        rstat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rstatActionPerformed(evt);
+            }
+        });
+        jPanel2.add(rstat, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 70, -1, 40));
+
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 850, 400));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -132,16 +174,16 @@ public class Bookroom extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_jLabel2MouseClicked
 
-    private void oTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_oTableMouseClicked
+    private void roomtableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_roomtableMouseClicked
 
-    }//GEN-LAST:event_oTableMouseClicked
+    }//GEN-LAST:event_roomtableMouseClicked
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        int rowIndex = oTable.getSelectedRow();
+        int rowIndex = roomtable.getSelectedRow();
         if(rowIndex < 0){
             JOptionPane.showMessageDialog(null, "Please select an item!");
         }else{
-            TableModel room = oTable.getModel();
+            TableModel room = roomtable.getModel();
             transaction of = new transaction();
             of.rid.setText(""+room.getValueAt(rowIndex, 0));
             of.rc.setText(""+room.getValueAt(rowIndex, 1));
@@ -155,6 +197,14 @@ public class Bookroom extends javax.swing.JFrame {
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
 
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void ridActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ridActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ridActionPerformed
+
+    private void rstatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rstatActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_rstatActionPerformed
 
     /**
      * @param args the command line arguments
@@ -195,10 +245,18 @@ public class Bookroom extends javax.swing.JFrame {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable oTable;
+    public javax.swing.JTextField rclass;
+    public javax.swing.JTextField rid;
+    private javax.swing.JTable roomtable;
+    public javax.swing.JTextField rp;
+    public javax.swing.JComboBox<String> rstat;
     // End of variables declaration//GEN-END:variables
 }

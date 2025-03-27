@@ -173,7 +173,7 @@ if (passw.isEmpty() || Cpassw.isEmpty() || oldPassInput.isEmpty()) {
         dbConnector dbc = new dbConnector();
         Session sess = Session.getInstance();
 
-        String query = "SELECT u_pass FROM tbl_accounts WHERE u_id = ?";
+        String query = "SELECT u_password FROM tbl_users WHERE u_id = ?";
         try (Connection conn = dbc.getConnection();
              PreparedStatement pst = conn.prepareStatement(query)) {
 
@@ -181,7 +181,7 @@ if (passw.isEmpty() || Cpassw.isEmpty() || oldPassInput.isEmpty()) {
             ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
-                String olddbPassword = rs.getString("u_pass");
+                String olddbPassword = rs.getString("u_password");
                 String oldhash = passwordHasher.hashPassword(oldPassInput);
                 String newhash = passwordHasher.hashPassword(passw);
 
@@ -198,7 +198,7 @@ if (passw.isEmpty() || Cpassw.isEmpty() || oldPassInput.isEmpty()) {
                 }
 
                 // Update the password
-                String updateQuery = "UPDATE tbl_accounts SET u_pass = ? WHERE u_id = ?";
+                String updateQuery = "UPDATE tbl_users SET u_password = ? WHERE u_id = ?";
                 try (PreparedStatement updatePst = conn.prepareStatement(updateQuery)) {
                     updatePst.setString(1, newhash);
                     updatePst.setInt(2, sess.getUid());
