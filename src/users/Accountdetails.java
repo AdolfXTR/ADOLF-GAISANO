@@ -6,8 +6,21 @@
 package users;
 
 import config.Session;
+import config.dbConnector;
 import guisaint.loginForm;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -21,6 +34,109 @@ public class Accountdetails extends javax.swing.JFrame {
     public Accountdetails() {
         initComponents();
     }
+public boolean updateCheck(){
+        
+     dbConnector dbc = new dbConnector();
+    Session sess = Session.getInstance();
+
+    try {
+        String query = "SELECT * FROM tbl_users WHERE (u_username = '" + acc_email.getText() 
+                     + "' OR u_email = '" + acc_uname.getText() 
+                     + "') AND u_id != '" + sess.getUid() + "'";
+
+        ResultSet resultSet = dbc.getData(query);
+
+        if (resultSet.next()) {
+            String email = resultSet.getString("u_email"); 
+            if (email.equals(acc_uname.getText())) { 
+                JOptionPane.showMessageDialog(null, "Email is Already Used!");
+                acc_uname.setText(""); 
+            }
+
+            String username = resultSet.getString("u_username");
+            if (username.equals(acc_email.getText())) { 
+                JOptionPane.showMessageDialog(null, "Username is Already Used!");
+                acc_email.setText(""); 
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    } catch (SQLException ex) {
+        System.out.println("" + ex);
+        return false;
+    }
+        
+    }
+       
+     private void uploadImage() {
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setFileFilter(new FileNameExtensionFilter("Image Files", "jpg", "jpeg", "png"));
+
+    int result = fileChooser.showOpenDialog(this);
+    if (result == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        
+        // Define destination path inside src/images/
+        File destinationFolder = new File("src/images/");
+        if (!destinationFolder.exists()) {
+            destinationFolder.mkdirs(); // Create folder if it does not exist
+        }
+
+        File destinationFile = new File(destinationFolder, selectedFile.getName());
+
+        try {
+            // Copy file to the destination folder
+            Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            
+            // Store the image path
+            selectedImagePath = "src/images/" + selectedFile.getName();
+
+            // Update the image label
+            image.setIcon(new javax.swing.ImageIcon(destinationFile.getAbsolutePath()));
+
+            JOptionPane.showMessageDialog(this, "Image uploaded successfully!");
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error uploading image: " + e.getMessage());
+        }
+    }
+}
+   
+     private String selectedImagePath = "";
+      
+
+
+
+    
+        public void logEvent(int userId, String username, String userType, String logDescription) {
+    dbConnector dbc = new dbConnector();
+    Connection con = dbc.getConnection();
+    PreparedStatement pstmt = null;
+
+    try {
+        String sql = "INSERT INTO tbl_log (u_id, u_username, login_time, u_type, log_status) VALUES (?, ?, ?, ?, ?)";
+        pstmt = con.prepareStatement(sql);
+
+        pstmt.setInt(1, userId);
+        pstmt.setString(2, username);
+        pstmt.setTimestamp(3, new Timestamp(new Date().getTime()));
+        pstmt.setString(4, userType); // This should be "Admin" or "User"
+        pstmt.setString(5, "Active");
+
+        pstmt.executeUpdate();
+        System.out.println("Log recorded successfully.");
+    } catch (SQLException e) {
+        System.out.println("Error recording log: " + e.getMessage());
+    } finally {
+        try {
+            if (pstmt != null) pstmt.close();
+            if (con != null) con.close();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error closing resources: " + e.getMessage());
+        }
+    }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -36,18 +152,23 @@ public class Accountdetails extends javax.swing.JFrame {
         iddisplay = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel8 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         fn = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         ln = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
-        em = new javax.swing.JTextField();
+        acc_email = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
-        un = new javax.swing.JTextField();
+        acc_uname = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         ut = new javax.swing.JComboBox<>();
-        jButton1 = new javax.swing.JButton();
+        jPanel4 = new javax.swing.JPanel();
+        image = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -84,6 +205,16 @@ public class Accountdetails extends javax.swing.JFrame {
         });
         jPanel2.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 310, -1, -1));
 
+        jButton1.setBackground(new java.awt.Color(0, 102, 102));
+        jButton1.setText("CHANGE PASS");
+        jButton1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, 100, 40));
+
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 120, 140, 340));
 
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
@@ -108,12 +239,12 @@ public class Accountdetails extends javax.swing.JFrame {
         jLabel10.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel10.setText("Email:");
         jPanel3.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 150, -1, -1));
-        jPanel3.add(em, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 170, 200, 40));
+        jPanel3.add(acc_email, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 170, 200, 40));
 
         jLabel11.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel11.setText("Username:");
         jPanel3.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 210, -1, -1));
-        jPanel3.add(un, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 230, 200, 40));
+        jPanel3.add(acc_uname, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 230, 200, 40));
 
         jLabel6.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel6.setText("Account Type:");
@@ -122,15 +253,34 @@ public class Accountdetails extends javax.swing.JFrame {
         ut.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Admin", "User" }));
         jPanel3.add(ut, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 280, -1, -1));
 
-        jButton1.setBackground(new java.awt.Color(0, 102, 102));
-        jButton1.setText("CHANGE PASS");
-        jButton1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jPanel4.add(image, new org.netbeans.lib.awtextra.AbsoluteConstraints(9, 18, 200, 110));
+
+        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 30, 220, 140));
+
+        jButton2.setText("UPDATE");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                jButton2ActionPerformed(evt);
             }
         });
-        jPanel3.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 50, -1, 40));
+        jPanel3.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 250, 210, -1));
+
+        jButton3.setText("BACK");
+        jButton3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton3MouseClicked(evt);
+            }
+        });
+        jPanel3.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 300, 210, -1));
+
+        jButton4.setText("SELECT PROFILE");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+        jPanel3.add(jButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 180, 160, 20));
 
         getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 120, 530, 340));
 
@@ -160,9 +310,110 @@ public class Accountdetails extends javax.swing.JFrame {
         iddisplay.setText("USER ID: "+sess.getUid());
         fn.setText(""+sess.getFname());    
         ln.setText(""+sess.getLname());
-        em.setText(""+sess.getEmail());
-        un.setText(""+sess.getUsername());        // TODO add your handling code here:
+        acc_email.setText(""+sess.getEmail());
+        acc_uname.setText(""+sess.getUsername());        // TODO add your handling code here:
     }//GEN-LAST:event_formWindowActivated
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+         JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setFileFilter(new FileNameExtensionFilter("Image Files", "jpg", "jpeg", "png"));
+
+    int result = fileChooser.showOpenDialog(this);
+    if (result == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        
+        // Define destination path inside src/images/
+        File destinationFolder = new File("src/images/");
+        if (!destinationFolder.exists()) {
+            destinationFolder.mkdirs(); // Create folder if it does not exist
+        }
+
+        File destinationFile = new File(destinationFolder, selectedFile.getName());
+
+        try {
+            // Copy file to the destination folder
+            Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            
+            // Store the image path
+            selectedImagePath = "src/images/" + selectedFile.getName();
+
+            // Update the image label
+            image.setIcon(new javax.swing.ImageIcon(destinationFile.getAbsolutePath()));
+
+            JOptionPane.showMessageDialog(this, "Image uploaded successfully!");
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error uploading image: " + e.getMessage());
+        }
+    }    // TODO add your handling code here:
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        dbConnector dbc = new dbConnector();
+Session sess = Session.getInstance();
+dbConnector connector = new dbConnector();
+int userId = 0;
+String uname2 = null;
+
+// Check if username or email already exists
+if (updateCheck()) {
+    return;
+}
+
+// Validate inputs
+if (fn.getText().isEmpty() || ln.getText().isEmpty() ||
+    acc_email.getText().isEmpty() || acc_uname.getText().isEmpty()) {
+    JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
+    return;
+}
+
+// SQL Query to update the user profile
+String query = "UPDATE tbl_users SET u_fname=?, u_lname=?, u_email=?, u_username=?, image=? WHERE u_id=?";
+
+try (Connection conn = dbc.getConnection();
+     PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+    pstmt.setString(1, fn.getText());
+    pstmt.setString(2, ln.getText());
+    pstmt.setString(3, acc_email.getText());
+    pstmt.setString(4, acc_uname.getText());
+    pstmt.setString(5, selectedImagePath);  // Store uploaded image path
+    pstmt.setInt(6, sess.getUid());
+
+    int rowsAffected = pstmt.executeUpdate();
+
+    if (rowsAffected > 0) {
+        JOptionPane.showMessageDialog(this, "Profile updated successfully!");
+
+        try {
+            String query2 = "SELECT * FROM tbl_users WHERE u_id = ?"; //use prepared statement.
+            PreparedStatement pstmt2 = connector.getConnection().prepareStatement(query2);
+            pstmt2.setInt(1, sess.getUid());
+
+            ResultSet resultSet = pstmt2.executeQuery();
+
+            if (resultSet.next()) {
+                userId = resultSet.getInt("u_id");  // Update the outer `userId` correctly
+                uname2 = resultSet.getString("u_username");
+            }
+        } catch (SQLException ex) {
+            System.out.println("SQL Exception: " + ex);
+        }
+
+        logEvent(userId, uname2, sess.getType(), "User Changed Their Details"); //fixed
+    } else {
+        JOptionPane.showMessageDialog(this, "Failed to update profile!", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+} catch (SQLException e) {
+    JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+}
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
+      usersDashboard ud = new usersDashboard();
+      ud.setVisible(true);
+      this.dispose();
+    }//GEN-LAST:event_jButton3MouseClicked
 
     /**
      * @param args the command line arguments
@@ -200,10 +451,15 @@ public class Accountdetails extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField em;
+    private javax.swing.JTextField acc_email;
+    private javax.swing.JTextField acc_uname;
     private javax.swing.JTextField fn;
     private javax.swing.JLabel iddisplay;
+    private javax.swing.JLabel image;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel4;
@@ -214,8 +470,8 @@ public class Accountdetails extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JTextField ln;
-    private javax.swing.JTextField un;
     private javax.swing.JComboBox<String> ut;
     // End of variables declaration//GEN-END:variables
 }

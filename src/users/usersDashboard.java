@@ -6,7 +6,13 @@
 package users;
 
 import config.Session;
+import config.dbConnector;
 import guisaint.loginForm;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 /**
@@ -20,8 +26,58 @@ public class usersDashboard extends javax.swing.JFrame {
      */
     public usersDashboard() {
         initComponents();
+         loadUserProfile();
     }
 
+     private void loadUserProfile() {
+    dbConnector dbc = new dbConnector();
+    Session sess = Session.getInstance();
+
+    String query = "SELECT u_image FROM tbl_users WHERE u_id = ?";
+
+    try (Connection conn = dbc.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+        pstmt.setInt(1, sess.getUid());
+        ResultSet rs = pstmt.executeQuery();
+
+        if (rs.next()) {
+            String imagePath = rs.getString("u_image");
+
+            if (imagePath != null && !imagePath.isEmpty()) {
+                ImageIcon icon = new ImageIcon(imagePath);
+                u_image.setIcon(icon);
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace(); // Log the error
+        JOptionPane.showMessageDialog(this, "Error loading profile image: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}   
+    
+    private void logoutUser(String username) {
+    dbConnector connector = new dbConnector();
+    try (Connection con = connector.getConnection()) {
+
+        String updateQuery = "UPDATE tbl_log SET log_status = 'Inactive', logout_time = NOW() " +
+                             "WHERE LOWER(u_username) = LOWER(?) AND log_status = 'Active'";
+
+        try (PreparedStatement stmt = con.prepareStatement(updateQuery)) {
+            System.out.println("Logging out user: " + username); // Debug
+            stmt.setString(1, username);
+            int updatedRows = stmt.executeUpdate();
+
+            if (updatedRows > 0) {
+                JOptionPane.showMessageDialog(null, "User " + username + " has logged out successfully!");
+            } else {
+                JOptionPane.showMessageDialog(null, "No active session found for " + username);
+            }
+        }
+
+    } catch (SQLException ex) {
+        JOptionPane.showMessageDialog(null, "Error logging out: " + ex.getMessage());
+    }
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -33,18 +89,20 @@ public class usersDashboard extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
-        acc_name = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
         jPanel6 = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
-        jPanel3 = new javax.swing.JPanel();
-        jPanel4 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        u_image = new javax.swing.JLabel();
+        acc_name = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        table = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -62,15 +120,22 @@ public class usersDashboard extends javax.swing.JFrame {
         jLabel5.setText("USER DASHBOARD");
         jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 50, -1, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 710, 120));
+        jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel2.setBackground(new java.awt.Color(0, 102, 102));
-        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        u_image.setIcon(new javax.swing.ImageIcon(getClass().getResource("/users/za.png"))); // NOI18N
+        jPanel6.add(u_image, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 110, 90));
+
+        jPanel1.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 130, 90));
 
         acc_name.setFont(new java.awt.Font("Showcard Gothic", 1, 14)); // NOI18N
         acc_name.setForeground(new java.awt.Color(255, 255, 255));
         acc_name.setText("USER");
-        jPanel2.add(acc_name, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 120, -1, -1));
+        jPanel1.add(acc_name, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 100, -1, -1));
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 710, 120));
+
+        jPanel2.setBackground(new java.awt.Color(0, 102, 102));
+        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel8.setFont(new java.awt.Font("Showcard Gothic", 1, 14)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(255, 255, 255));
@@ -82,32 +147,8 @@ public class usersDashboard extends javax.swing.JFrame {
         });
         jPanel2.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 340, -1, -1));
 
-        jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/users/za.png"))); // NOI18N
-        jPanel6.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 60, 80));
-
-        jPanel2.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, 70, 80));
-
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 130, 140, 400));
-
-        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jPanel4.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jPanel4MouseClicked(evt);
-            }
-        });
-        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel2.setText("AVAILABLE ROOM");
-        jPanel4.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 80, 110, 20));
-
-        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/users/V2.png"))); // NOI18N
-        jPanel4.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 10, 60, 60));
-
-        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 120, 130, 110));
+        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/users/za.png"))); // NOI18N
+        jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 160, -1, 60));
 
         jPanel5.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -117,12 +158,48 @@ public class usersDashboard extends javax.swing.JFrame {
         jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setText("ACCOUNT");
-        jPanel5.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(37, 70, 60, 20));
+        jLabel1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel1MouseClicked(evt);
+            }
+        });
+        jPanel5.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 80, -1));
 
-        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/users/za.png"))); // NOI18N
-        jPanel5.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 10, 50, 60));
+        jPanel2.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 150, 120, 110));
 
-        jPanel3.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 120, 130, 110));
+        jLabel2.setText("ROOM AVAIL");
+        jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, 110, -1));
+
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/users/V2.png"))); // NOI18N
+        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 40, 60, 60));
+
+        jPanel4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jPanel4MouseClicked(evt);
+            }
+        });
+        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jPanel2.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, 120, 110));
+
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 130, 140, 400));
+
+        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        table.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(table);
+
+        jPanel3.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, 520, 340));
 
         getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 130, 550, 390));
 
@@ -158,6 +235,12 @@ public class usersDashboard extends javax.swing.JFrame {
         ads.setVisible(true);
         this.dispose();    // TODO add your handling code here:
     }//GEN-LAST:event_jPanel4MouseClicked
+
+    private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
+      Accountdetails ac = new Accountdetails();
+      ac.setVisible(true);
+      this.dispose();
+    }//GEN-LAST:event_jLabel1MouseClicked
 
     /**
      * @param args the comma nd line arguments
@@ -199,7 +282,6 @@ public class usersDashboard extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel8;
@@ -209,5 +291,8 @@ public class usersDashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable table;
+    private javax.swing.JLabel u_image;
     // End of variables declaration//GEN-END:variables
 }

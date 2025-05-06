@@ -9,8 +9,13 @@ package guisaint;
 import config.dbConnector;
 import config.passwordHasher;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
@@ -59,7 +64,35 @@ public class registrationForm extends javax.swing.JFrame {
          return false;
      }
     }
+  public void logEvent(int userId, String username, String description) {
+    dbConnector dbc = new dbConnector();
+    Connection con = dbc.getConnection();
+    PreparedStatement pstmt = null;
 
+    try {
+        // Fixed: include `log_description` in your INSERT
+        String sql = "INSERT INTO tbl_log (u_id, u_username, login_time, u_type, log_status) VALUES (?, ?, ?, ?, ?)";
+        pstmt = con.prepareStatement(sql);
+
+        pstmt.setInt(1, userId);
+        pstmt.setString(2, username);
+        pstmt.setTimestamp(3, new Timestamp(new Date().getTime())); // login_time
+        pstmt.setString(4, "Success - User Action"); // u_type (general category)
+        pstmt.setString(5, "Active"); // log_status
+
+        pstmt.executeUpdate();
+        System.out.println("Log event recorded successfully.");
+    } catch (SQLException e) {
+        System.out.println("Error recording log: " + e.getMessage());
+    } finally {
+        try {
+            if (pstmt != null) pstmt.close();
+            if (con != null) con.close();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error closing resources: " + e.getMessage());
+        }
+    }
+  }
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -92,6 +125,9 @@ public class registrationForm extends javax.swing.JFrame {
         ut = new javax.swing.JComboBox<>();
         jButton3 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
+        sq = new javax.swing.JComboBox<>();
+        ans = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -129,11 +165,9 @@ public class registrationForm extends javax.swing.JFrame {
 
         Main.add(Left, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 0, -1, -1));
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         jLabel2.setText("Password");
         Main.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 360, 90, 40));
 
-        jLabel3.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         jLabel3.setText("Last Name");
         Main.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 110, 90, 40));
 
@@ -141,7 +175,6 @@ public class registrationForm extends javax.swing.JFrame {
         jLabel5.setText("It’s quick and easy. ");
         Main.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 80, -1, -1));
 
-        ln.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         ln.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 lnActionPerformed(evt);
@@ -149,7 +182,6 @@ public class registrationForm extends javax.swing.JFrame {
         });
         Main.add(ln, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 150, 190, 40));
 
-        un.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         un.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 unActionPerformed(evt);
@@ -157,11 +189,9 @@ public class registrationForm extends javax.swing.JFrame {
         });
         Main.add(un, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 220, 420, 40));
 
-        jLabel10.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         jLabel10.setText("First Name");
         Main.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 110, 90, 40));
 
-        fn.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         fn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fnActionPerformed(evt);
@@ -169,11 +199,9 @@ public class registrationForm extends javax.swing.JFrame {
         });
         Main.add(fn, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 150, 200, 40));
 
-        jLabel11.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         jLabel11.setText("Username");
         Main.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 190, 90, 40));
 
-        ps.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         ps.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 psActionPerformed(evt);
@@ -181,7 +209,6 @@ public class registrationForm extends javax.swing.JFrame {
         });
         Main.add(ps, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 400, 420, 50));
 
-        em.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         em.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 emActionPerformed(evt);
@@ -189,7 +216,6 @@ public class registrationForm extends javax.swing.JFrame {
         });
         Main.add(em, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 310, 420, 40));
 
-        jLabel15.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         jLabel15.setText("Email");
         Main.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 270, 90, 40));
 
@@ -202,7 +228,7 @@ public class registrationForm extends javax.swing.JFrame {
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel4.setText("Account Type :");
-        Main.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 480, -1, -1));
+        Main.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 580, -1, -1));
 
         ut.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Admin", "User" }));
         ut.addActionListener(new java.awt.event.ActionListener() {
@@ -210,7 +236,7 @@ public class registrationForm extends javax.swing.JFrame {
                 utActionPerformed(evt);
             }
         });
-        Main.add(ut, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 480, -1, -1));
+        Main.add(ut, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 580, -1, -1));
 
         jButton3.setBackground(new java.awt.Color(0, 102, 102));
         jButton3.setText("REGISTER");
@@ -220,7 +246,7 @@ public class registrationForm extends javax.swing.JFrame {
                 jButton3ActionPerformed(evt);
             }
         });
-        Main.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 570, 100, 40));
+        Main.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 620, 100, 40));
 
         jButton1.setBackground(new java.awt.Color(0, 102, 102));
         jButton1.setText("CANCEL");
@@ -230,7 +256,14 @@ public class registrationForm extends javax.swing.JFrame {
                 jButton1MouseClicked(evt);
             }
         });
-        Main.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 570, 90, 40));
+        Main.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 620, 90, 40));
+
+        sq.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "What is your Favourite Sports?", "Why are you Gay?", "What is your Favorite Color?" }));
+        Main.add(sq, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 480, 420, 40));
+        Main.add(ans, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 530, 420, 40));
+
+        jLabel9.setText("Question :");
+        Main.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 460, -1, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -288,8 +321,8 @@ public class registrationForm extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
 
    
-       if(fn.getText().isEmpty() || ln.getText().isEmpty() || em.getText().isEmpty() || un.getText().isEmpty() || 
-   ps.getText().isEmpty()) {
+     if(fn.getText().isEmpty() || ln.getText().isEmpty() || em.getText().isEmpty() || un.getText().isEmpty() || 
+   ps.getText().isEmpty() || ans.getText().isEmpty()) {
     JOptionPane.showMessageDialog(null, "All fields are required!");   
 } else if(ps.getText().length() < 8) {
     JOptionPane.showMessageDialog(null, "Password character should be 8 and above");
@@ -300,20 +333,46 @@ public class registrationForm extends javax.swing.JFrame {
     dbConnector dbc = new dbConnector();
     try {
         String pass = passwordHasher.hashPassword(ps.getText());
+        String secQuestion = sq.getSelectedItem().toString();
+        String secAnswer = passwordHasher.hashPassword(ans.getText());
 
-        if(dbc.insertData("INSERT INTO tbl_users (u_fname, u_lname, u_email, u_username, u_password, u_type, u_status) "
-                + "VALUES ('" + fn.getText() + "','" + ln.getText() + "','" + em.getText() + "','" + un.getText() + "','" + pass + "','" + ut.getSelectedItem() + "','Pending')")) 
-        {
-            JOptionPane.showMessageDialog(null, "Inserted Success!");
-            loginForm lfr = new loginForm();
-            lfr.setVisible(true);
-            this.dispose();
-        } else {
-            JOptionPane.showMessageDialog(null, "Connection Error!");      
-        }     
-    } catch(NoSuchAlgorithmException ex) {
-        System.out.println("" + ex);
+        String query = "INSERT INTO tbl_users (u_fname, u_lname, u_email, u_username, u_password, security_question, security_answer, u_type, image, u_status) "
+             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'NULL', 'Pending')";
+
+
+        try (Connection con = dbc.getConnection();
+             PreparedStatement stmt = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, fn.getText());
+            stmt.setString(2, ln.getText());
+            stmt.setString(3, em.getText());
+            stmt.setString(4, un.getText());
+            stmt.setString(5, pass);
+            stmt.setString(6, secQuestion);
+            stmt.setString(7, secAnswer);
+            stmt.setString(8, ut.getSelectedItem().toString());
+
+            int rowsInserted = stmt.executeUpdate();
+            if (rowsInserted > 0) {
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int userId = rs.getInt(1); // Auto-generated user ID
+                        logEvent(userId, un.getText(), "New user registered: " + un.getText());
+
+                        JOptionPane.showMessageDialog(null, "Inserted Success!");
+                        loginForm lfr = new loginForm();
+                        lfr.setVisible(true);
+                        this.dispose();
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Connection Error!");      
+            }
+        }
+    } catch (SQLException | NoSuchAlgorithmException ex) {
+        System.out.println("Error: " + ex.getMessage());
     }
+
     }//GEN-LAST:event_jButton3ActionPerformed
     }
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
@@ -362,6 +421,7 @@ public class registrationForm extends javax.swing.JFrame {
     private javax.swing.JPanel Left;
     private javax.swing.JPanel Main;
     private javax.swing.JPanel Right;
+    private javax.swing.JTextField ans;
     private javax.swing.JTextField em;
     private javax.swing.JTextField fn;
     private javax.swing.JButton jButton1;
@@ -377,8 +437,10 @@ public class registrationForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JTextField ln;
     private javax.swing.JPasswordField ps;
+    private javax.swing.JComboBox<String> sq;
     private javax.swing.JCheckBox sss;
     private javax.swing.JTextField un;
     private javax.swing.JComboBox<String> ut;
