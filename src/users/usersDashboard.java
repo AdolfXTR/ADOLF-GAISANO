@@ -33,7 +33,7 @@ public class usersDashboard extends javax.swing.JFrame {
     dbConnector dbc = new dbConnector();
     Session sess = Session.getInstance();
 
-    String query = "SELECT u_image FROM tbl_users WHERE u_id = ?";
+    String query = "SELECT image FROM tbl_users WHERE u_id = ?";
 
     try (Connection conn = dbc.getConnection();
          PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -42,7 +42,7 @@ public class usersDashboard extends javax.swing.JFrame {
         ResultSet rs = pstmt.executeQuery();
 
         if (rs.next()) {
-            String imagePath = rs.getString("u_image");
+            String imagePath = rs.getString("image");
 
             if (imagePath != null && !imagePath.isEmpty()) {
                 ImageIcon icon = new ImageIcon(imagePath);

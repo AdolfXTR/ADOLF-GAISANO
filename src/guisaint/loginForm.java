@@ -357,55 +357,79 @@ public class loginForm extends javax.swing.JFrame {
     }//GEN-LAST:event_regMouseClicked
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-       String username = user.getText();
-String password = pass.getText();
+  String username = user.getText();
+String password = new String(pass.getPassword());
 dbConnector connector = new dbConnector();
-String status2 = null;
 
-if (loginAcc(username, password)) {
-    Session sess = Session.getInstance();
-    int userId = sess.getUid();
-
-    // Retrieve the status and type after the login
-    String status = getStatusFromDatabase(username);  // Should return "Active" or "Inactive"
-    String type = getUserTypeFromDatabase(username);  // Should return "Admin" or "User"
-
-    try {
-        String query2 = "SELECT * FROM tbl_users WHERE u_username = ?";
-        PreparedStatement pstmt = connector.getConnection().prepareStatement(query2);
-        pstmt.setString(1, username);
-
-        ResultSet resultSet = pstmt.executeQuery();
-        if (resultSet.next()) {
-            status2 = resultSet.getString("u_status");
-        }
-    } catch (SQLException ex) {
-        System.out.println("SQL Exception: " + ex.getMessage());
-        ex.printStackTrace();  // Better diagnostics
-    }
-
-    if (!status.equals("Active")) {
-        JOptionPane.showMessageDialog(null, "In-Active Account, Contact the Admin!");
-        logEvent(userId, username, "Failed - Inactive Account");
-    } else {
-        if (type.equals("Admin")) {
-            JOptionPane.showMessageDialog(null, "Login Success!");
-            logEvent(userId, username, "Success - Admin Login");
-            adminDashboard ads = new adminDashboard();
-            ads.setVisible(true);
-            this.dispose();
-        } else if (type.equals("User")) {
-            JOptionPane.showMessageDialog(null, "Login Success!");
-            logEvent(userId, username, "Success - User Login");
-            usersDashboard usd = new usersDashboard();
-            usd.setVisible(true);
-            this.dispose();
-        } else {
-            JOptionPane.showMessageDialog(null, "No account type found, Contact the Admin!");
-        }
-    }
+// Input validation
+if (username.isEmpty() && pass.getPassword().length == 0) {
+    JOptionPane.showMessageDialog(null, "All fields are required!");
+} else if (username.isEmpty()) {
+    JOptionPane.showMessageDialog(null, "Username is required!");
+} else if (pass.getPassword().length == 0) {
+    JOptionPane.showMessageDialog(null, "Password is required!");
+} else if (pass.getPassword().length < 8) {
+    JOptionPane.showMessageDialog(null, "Password should have at least 8 characters.");
 } else {
-    JOptionPane.showMessageDialog(null, "Invalid Account!");
+    if (loginAcc(username, password)) {
+        Session sess = Session.getInstance();
+        int userId = sess.getUid();
+
+        String status = "";
+        String type = "";
+
+        try {
+            // Get status and type from database
+            String query = "SELECT u_status, u_type FROM tbl_users WHERE u_username = ?";
+            PreparedStatement pstmt = connector.getConnection().prepareStatement(query);
+            pstmt.setString(1, username);
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                status = rs.getString("u_status");
+                type = rs.getString("u_type");
+            }
+
+            rs.close();
+            pstmt.close();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
+            return;
+        }
+
+        // Handle account status
+        if (!"Active".equalsIgnoreCase(status)) {
+            if ("Pending".equalsIgnoreCase(status)) {
+                JOptionPane.showMessageDialog(null, "Your account is still pending approval.");
+                logEvent(userId, username, "Failed - Pending Account");
+            } else {
+                JOptionPane.showMessageDialog(null, "Your account is inactive. Contact the administrator.");
+                logEvent(userId, username, "Failed - Inactive Account");
+            }
+        } else {
+            // Login success, route to dashboard
+            if ("Admin".equalsIgnoreCase(type)) {
+                JOptionPane.showMessageDialog(null, "Login Success! Welcome Admin.");
+                logEvent(userId, username, "Success - Admin Login");
+                adminDashboard ads = new adminDashboard();
+                ads.setVisible(true);
+                this.dispose();
+            } else if ("Patient".equalsIgnoreCase(type) || "User".equalsIgnoreCase(type)) {
+                JOptionPane.showMessageDialog(null, "Login Success! Welcome User.");
+                logEvent(userId, username, "Success - User Login");
+                usersDashboard usd = new usersDashboard();
+                usd.setVisible(true);
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Unknown account type. Contact the administrator.");
+                logEvent(userId, username, "Failed - Unknown Account Type");
+            }
+        }
+
+    } else {
+        JOptionPane.showMessageDialog(null, "Invalid username or password.");
+        logEvent(-1, username, "Failed - Invalid Login");
+    }
 }
 
     }//GEN-LAST:event_jButton1ActionPerformed

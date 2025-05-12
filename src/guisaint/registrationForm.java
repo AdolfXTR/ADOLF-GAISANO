@@ -321,24 +321,34 @@ public class registrationForm extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
 
    
-     if(fn.getText().isEmpty() || ln.getText().isEmpty() || em.getText().isEmpty() || un.getText().isEmpty() || 
-   ps.getText().isEmpty() || ans.getText().isEmpty()) {
-    JOptionPane.showMessageDialog(null, "All fields are required!");   
-} else if(ps.getText().length() < 8) {
-    JOptionPane.showMessageDialog(null, "Password character should be 8 and above");
+    if (fn.getText().isEmpty() || ln.getText().isEmpty() || em.getText().isEmpty() ||
+    un.getText().isEmpty() || ps.getText().isEmpty() || ans.getText().isEmpty()) {
+    
+    JOptionPane.showMessageDialog(null, "All fields are required!");
+
+} else if (ps.getText().length() < 8) {
+    
+    JOptionPane.showMessageDialog(null, "Password should be at least 8 characters long.");
     ps.setText("");
-} else if(duplicateCheck()) {
-    System.out.println("Duplicate Exist!");
+
+} else if (duplicateCheck()) {
+    
+    JOptionPane.showMessageDialog(null, "Username or Email already exists!");
+
 } else {
+
     dbConnector dbc = new dbConnector();
+
     try {
+        // Hash password and answer
         String pass = passwordHasher.hashPassword(ps.getText());
         String secQuestion = sq.getSelectedItem().toString();
         String secAnswer = passwordHasher.hashPassword(ans.getText());
+        String userType = ut.getSelectedItem() != null ? ut.getSelectedItem().toString() : "User";
 
+        // Prepare SQL insert
         String query = "INSERT INTO tbl_users (u_fname, u_lname, u_email, u_username, u_password, security_question, security_answer, u_type, image, u_status) "
-             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'NULL', 'Pending')";
-
+                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'NULL', 'Pending')";
 
         try (Connection con = dbc.getConnection();
              PreparedStatement stmt = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -350,28 +360,32 @@ public class registrationForm extends javax.swing.JFrame {
             stmt.setString(5, pass);
             stmt.setString(6, secQuestion);
             stmt.setString(7, secAnswer);
-            stmt.setString(8, ut.getSelectedItem().toString());
+            stmt.setString(8, userType);
 
             int rowsInserted = stmt.executeUpdate();
+
             if (rowsInserted > 0) {
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         int userId = rs.getInt(1); // Auto-generated user ID
                         logEvent(userId, un.getText(), "New user registered: " + un.getText());
 
-                        JOptionPane.showMessageDialog(null, "Inserted Success!");
+                        JOptionPane.showMessageDialog(null, "Registration successful! Awaiting account approval.");
                         loginForm lfr = new loginForm();
                         lfr.setVisible(true);
                         this.dispose();
                     }
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Connection Error!");      
+                JOptionPane.showMessageDialog(null, "Failed to register. Please try again.");
             }
         }
+
     } catch (SQLException | NoSuchAlgorithmException ex) {
         System.out.println("Error: " + ex.getMessage());
+        JOptionPane.showMessageDialog(null, "An error occurred: " + ex.getMessage());
     }
+
 
     }//GEN-LAST:event_jButton3ActionPerformed
     }
