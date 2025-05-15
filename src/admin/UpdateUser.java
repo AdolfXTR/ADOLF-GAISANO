@@ -3,9 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package guisaint;
+package admin;
 
+import guisaint.*;
 import admin.usersForm;
+import config.Session;
 import config.dbConnector;
 import config.passwordHasher;
 import static guisaint.registrationForm.username;
@@ -32,12 +34,12 @@ import javax.swing.JOptionPane;
  *
  * @author milan
  */
-public class CreateUserForm extends javax.swing.JFrame {
+public class UpdateUser extends javax.swing.JFrame {
 
     /**
      * Creates new form CreateUserForm
      */
-    public CreateUserForm() {
+    public UpdateUser() {
         initComponents();
     }
     
@@ -142,6 +144,11 @@ public class CreateUserForm extends javax.swing.JFrame {
         us = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowActivated(java.awt.event.WindowEvent evt) {
+                formWindowActivated(evt);
+            }
+        });
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(0, 102, 102));
@@ -162,7 +169,6 @@ public class CreateUserForm extends javax.swing.JFrame {
 
         update.setBackground(new java.awt.Color(0, 102, 102));
         update.setText("UPDATE");
-        update.setEnabled(false);
         update.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 updateActionPerformed(evt);
@@ -242,6 +248,7 @@ public class CreateUserForm extends javax.swing.JFrame {
         jLabel5.setText("Password:");
         jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 300, -1, -1));
 
+        ps.setEnabled(false);
         ps.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 psActionPerformed(evt);
@@ -349,88 +356,92 @@ pst.setString(7, type);  // Fix: Add Account Type (u_type)
 
     private void updateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateActionPerformed
 
-         String id = uid.getText().trim();
+   String id = uid.getText().trim();
 String email = em.getText().trim();
 String username = un.getText().trim();
 String pass = ps.getText().trim();
-String firstName = fn.getText().trim();  // First name
-String lastName = ln.getText().trim();   // Last name
-String type = ut.getSelectedItem().toString();  // User type
-String statusValue = us.getSelectedItem().toString(); // User status
+String firstName = fn.getText().trim();
+String lastName = ln.getText().trim();
+String type = ut.getSelectedItem().toString();
+String statusValue = us.getSelectedItem().toString();
 
-// Validation
+// Debug: Print to confirm the correct ID is used
+System.out.println("Updating user with ID: " + id);
+
 if (id.isEmpty()) {
     JOptionPane.showMessageDialog(this, "Error: User ID is missing.", "Error", JOptionPane.ERROR_MESSAGE);
     return;
 }
 
 if (firstName.isEmpty() || lastName.isEmpty()) {
-    JOptionPane.showMessageDialog(this, "Error: First Name and Last Name are required.", "Error", JOptionPane.ERROR_MESSAGE);
+    JOptionPane.showMessageDialog(this, "First Name and Last Name are required.", "Error", JOptionPane.ERROR_MESSAGE);
     return;
 }
 
-// Email validation
 String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 if (!email.matches(emailRegex)) {
     JOptionPane.showMessageDialog(this, "Invalid Email! Please enter a valid email address.", "Error", JOptionPane.ERROR_MESSAGE);
     return;
 }
 
-// Username validation
 if (!username.matches("[a-zA-Z0-9_]{5,}")) {
     JOptionPane.showMessageDialog(this, "Invalid Username! Must be at least 5 characters and contain only letters, numbers, and underscores.", "Error", JOptionPane.ERROR_MESSAGE);
     return;
 }
 
 try {
-    // Hash the password using SHA-256 before storing
-    String hashedPassword = passwordHasher.hashPassword(pass);
+    String hashedPassword = passwordHasher.hashPassword(pass); // Hash password
 
     dbConnector dbc = new dbConnector();
+    Connection conn = dbc.getConnection();
+
     String checkQuery = "SELECT COUNT(*) FROM tbl_users WHERE (u_username = ? OR u_email = ?) AND u_id != ?";
+    PreparedStatement checkPst = conn.prepareStatement(checkQuery);
+    checkPst.setString(1, username);
+    checkPst.setString(2, email);
+    checkPst.setInt(3, Integer.parseInt(id));
+    ResultSet rs = checkPst.executeQuery();
 
-    try (Connection conn = dbc.getConnection();
-         PreparedStatement pst = conn.prepareStatement(checkQuery)) {
-
-        pst.setString(1, username);
-        pst.setString(2, email);
-        pst.setInt(3, Integer.parseInt(id));
-
-        try (ResultSet rs = pst.executeQuery()) {
-            if (rs.next() && rs.getInt(1) > 0) {
-                JOptionPane.showMessageDialog(this, "Username or Email already exists! Please use different credentials.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-
-        // ✅ Corrected the column order in the UPDATE query
-        String updateQuery = "UPDATE tbl_users SET u_fname = ?, u_lname = ?, u_username = ?, u_email = ?, u_password = ?, u_status = ?, u_type = ? WHERE u_id = ?";
-
-        try (Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hotel_management", "root", "");
-             PreparedStatement updatePst = con.prepareStatement(updateQuery)) {
-
-            updatePst.setString(1, firstName);   // First name
-            updatePst.setString(2, lastName);    // Last name
-            updatePst.setString(3, username);    // Username
-            updatePst.setString(4, email);       // Email
-            updatePst.setString(5, hashedPassword);  // Store hashed password
-            updatePst.setString(6, statusValue); // Status (Corrected order)
-            updatePst.setString(7, type);        // Type (Corrected order)
-            updatePst.setInt(8, Integer.parseInt(id));  // User ID
-
-            int updated = updatePst.executeUpdate();
-            if (updated > 0) {
-                JOptionPane.showMessageDialog(this, "User updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                new usersForm().setVisible(true);
-                this.dispose();
-            } else {
-                JOptionPane.showMessageDialog(this, "Update failed!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
+    if (rs.next() && rs.getInt(1) > 0) {
+        JOptionPane.showMessageDialog(this, "Username or Email already exists! Please use different credentials.", "Error", JOptionPane.ERROR_MESSAGE);
+        rs.close();
+        checkPst.close();
+        conn.close();
+        return;
     }
-} catch (Exception ex) {
-    JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+    rs.close();
+    checkPst.close();
+
+    String updateQuery = "UPDATE tbl_users SET u_fname = ?, u_lname = ?, u_username = ?, u_email = ?, u_password = ?, u_status = ?, u_type = ? WHERE u_id = ?";
+    PreparedStatement updatePst = conn.prepareStatement(updateQuery);
+
+    updatePst.setString(1, firstName);
+    updatePst.setString(2, lastName);
+    updatePst.setString(3, username);
+    updatePst.setString(4, email);
+    updatePst.setString(5, hashedPassword);
+    updatePst.setString(6, statusValue);
+    updatePst.setString(7, type);
+    updatePst.setInt(8, Integer.parseInt(id));
+
+    int updated = updatePst.executeUpdate();
+    updatePst.close();
+    conn.close();
+
+    if (updated > 0) {
+        JOptionPane.showMessageDialog(this, "User updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        new usersForm().setVisible(true);
+        this.dispose();
+    } else {
+        JOptionPane.showMessageDialog(this, "Update failed! Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+} catch (Exception e) {
+    JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    e.printStackTrace(); // Debug log
 }
+
     }//GEN-LAST:event_updateActionPerformed
 
     private void deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteActionPerformed
@@ -463,6 +474,18 @@ try {
         this.dispose();        // TODO add your handling code here:
     }//GEN-LAST:event_cancelMouseClicked
 
+    private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
+        Session sess = Session.getInstance();
+        if(sess.getUid() == 0){
+            JOptionPane.showMessageDialog(null, "No account, Login First!"); 
+           loginForm lf = new loginForm();
+           lf.setVisible(true);
+           this.dispose();
+        }
+        uid.setText(""+sess.getUid()); 
+        
+    }//GEN-LAST:event_formWindowActivated
+
     /**
      * @param args the command line arguments
      */
@@ -480,20 +503,21 @@ try {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(CreateUserForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(CreateUserForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(CreateUserForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(CreateUserForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new CreateUserForm().setVisible(true);
+                new UpdateUser().setVisible(true);
             }
         });
     }

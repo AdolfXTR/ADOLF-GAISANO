@@ -201,38 +201,7 @@ private JComboBox<String> type;
         e.printStackTrace();
         return false;
     }
-}
-       
-         private void deleteUser() {
-         int selectedRow = user_table.getSelectedRow();
-    if (selectedRow == -1) {
-        JOptionPane.showMessageDialog(this, "Please select a user to delete.");
-        return;
-    }
 
-    int userId = (int) user_table.getValueAt(selectedRow, 0);
-    int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this user?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
-    
-    if (confirm == JOptionPane.YES_OPTION) {
-        String sql = "DELETE FROM tbl_users WHERE u_id=?";
-
-        try (Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hotel_management", "root", "");
-             PreparedStatement pst = con.prepareStatement(sql)) {
-
-            pst.setInt(1, userId);
-            int affectedRows = pst.executeUpdate();
-
-            if (affectedRows > 0) {
-                JOptionPane.showMessageDialog(this, "User Deleted Successfully!");
-                loadUsersData();  // Ensure this method exists
-            } else {
-                JOptionPane.showMessageDialog(this, "No user found to delete.", "Deletion Failed", JOptionPane.WARNING_MESSAGE);
-            }
-
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
     }
          
           private String hashPassword(String password) {
@@ -271,7 +240,7 @@ private JComboBox<String> type;
         user_table = new javax.swing.JTable();
         add = new javax.swing.JButton();
         update = new javax.swing.JButton();
-        register1 = new javax.swing.JButton();
+        deleteuser = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -403,14 +372,14 @@ private JComboBox<String> type;
         });
         jPanel3.add(update, new org.netbeans.lib.awtextra.AbsoluteConstraints(177, 12, 126, 45));
 
-        register1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        register1.setText("DELETE");
-        register1.addActionListener(new java.awt.event.ActionListener() {
+        deleteuser.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        deleteuser.setText("DELETE");
+        deleteuser.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                register1ActionPerformed(evt);
+                deleteuserActionPerformed(evt);
             }
         });
-        jPanel3.add(register1, new org.netbeans.lib.awtextra.AbsoluteConstraints(321, 11, 140, 46));
+        jPanel3.add(deleteuser, new org.netbeans.lib.awtextra.AbsoluteConstraints(321, 11, 140, 46));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -470,43 +439,84 @@ private JComboBox<String> type;
     }//GEN-LAST:event_updateMouseClicked
 
     private void updateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateActionPerformed
-        int rowIndex = user_table.getSelectedRow();
-        if (rowIndex < 0) {
-            JOptionPane.showMessageDialog(null, "Please select a User!");
-        } else {
-            try {
-                dbConnector dbc = new dbConnector();
-                TableModel tbl = user_table.getModel();
+     int rowIndex = user_table.getSelectedRow();
+if (rowIndex < 0) {
+    JOptionPane.showMessageDialog(this, "Please select a User!");
+} else {
+    try {
+        dbConnector dbc = new dbConnector();
+        TableModel tbl = user_table.getModel();
 
-                String userId = tbl.getValueAt(rowIndex, 0).toString();
-                String query = "SELECT * FROM tbl_users WHERE u_id = ?";
+        String userId = tbl.getValueAt(rowIndex, 0).toString();
+        String query = "SELECT * FROM tbl_users WHERE u_id = ?";
 
-                PreparedStatement pst = dbc.getConnection().prepareStatement(query);
-                pst.setString(1, userId);
-                ResultSet rs = pst.executeQuery();
+        try (Connection conn = dbc.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
 
-                if (rs.next()) {
-                    CreateUserForm cuf = new CreateUserForm();
-                    cuf.uid.setText(userId);
-                    cuf.fn.setText(rs.getString("u_fname"));  // Ensure u_fname is the correct column name
-                    cuf.ln.setText(rs.getString("u_lname"));
-                    cuf.us.setSelectedItem(rs.getString("u_status"));
-                    cuf.ut.setSelectedItem(rs.getString("u_type"));
-                    cuf.em.setText(rs.getString("u_email"));
-                    cuf.un.setText(rs.getString("u_username"));
-                    cuf.ps.setEnabled(true);
+            pst.setString(1, userId);
+            ResultSet rs = pst.executeQuery();
 
-                    cuf.setVisible(true);
-                    this.dispose();
-                }
-            } catch (SQLException ex) {
-                System.out.println("Error: " + ex.getMessage());
-            }        // TODO add your handling code here:
+            if (rs.next()) {
+                // Load data into UpdateUser form
+                UpdateUser up = new UpdateUser();
+                up.uid.setText(userId);
+                up.fn.setText(rs.getString("u_fname"));
+                up.ln.setText(rs.getString("u_lname"));
+                up.us.setSelectedItem(rs.getString("u_status"));
+                up.ut.setSelectedItem(rs.getString("u_type"));
+                up.em.setText(rs.getString("u_email"));
+                up.un.setText(rs.getString("u_username"));
+                up.ps.setEnabled(true); // If you want password editing enabled
+
+                up.setVisible(true);
+                this.dispose(); // Close current form
+            } else {
+                JOptionPane.showMessageDialog(this, "User not found!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        }
+    } catch (SQLException ex) {
+        JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+    }
+
     }//GEN-LAST:event_updateActionPerformed
     }
-    private void register1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_register1ActionPerformed
-        deleteUser();
-    }//GEN-LAST:event_register1ActionPerformed
+    private void deleteuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteuserActionPerformed
+                                             
+     int selectedRow = user_table.getSelectedRow();
+if (selectedRow == -1) {
+    JOptionPane.showMessageDialog(this, "Please select a user.");
+    return;
+}
+
+int userId = (int) user_table.getValueAt(selectedRow, 0);
+
+int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to clear this user's email?", "Confirm Update", JOptionPane.YES_NO_OPTION);
+
+if (confirm == JOptionPane.YES_OPTION) {
+    String updateSql = "UPDATE tbl_users SET u_email = '' WHERE u_id = ?";
+
+    try (Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hotel_management", "root", "");
+         PreparedStatement pst = con.prepareStatement(updateSql)) {
+
+        pst.setInt(1, userId);
+        int affectedRows = pst.executeUpdate();
+
+        if (affectedRows > 0) {
+            JOptionPane.showMessageDialog(this, "User email cleared successfully!");
+            loadUsersData();
+        } else {
+            JOptionPane.showMessageDialog(this, "No user found to update.", "Update Failed", JOptionPane.WARNING_MESSAGE);
+        }
+
+    } catch (SQLException ex) {
+        JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+
+
+    }//GEN-LAST:event_deleteuserActionPerformed
 
     /**
      * @param args the command line arguments
@@ -551,6 +561,7 @@ private JComboBox<String> type;
     private javax.swing.JLabel acc_id;
     private javax.swing.JLabel acc_name1;
     private javax.swing.JButton add;
+    private javax.swing.JButton deleteuser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
@@ -558,7 +569,6 @@ private JComboBox<String> type;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JButton register1;
     private javax.swing.JButton update;
     private javax.swing.JTable user_table;
     // End of variables declaration//GEN-END:variables
