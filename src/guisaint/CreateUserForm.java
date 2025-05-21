@@ -5,7 +5,6 @@
  */
 package guisaint;
 
-import admin.usersForm;
 import config.dbConnector;
 import config.passwordHasher;
 import static guisaint.registrationForm.username;
@@ -27,6 +26,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import users.UsersForm;
 
 /**
  *
@@ -336,7 +336,7 @@ pst.setString(7, type);  // Fix: Add Account Type (u_type)
         int rowsInserted = pst.executeUpdate();
         if (rowsInserted > 0) {
             JOptionPane.showMessageDialog(null, "Registered Successfully!");
-            new usersForm().setVisible(true);
+            new UsersForm().setVisible(true);
             this.dispose();
         } else {
             JOptionPane.showMessageDialog(null, "Registration Failed!");
@@ -421,7 +421,7 @@ try {
             int updated = updatePst.executeUpdate();
             if (updated > 0) {
                 JOptionPane.showMessageDialog(this, "User updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                new usersForm().setVisible(true);
+                new UsersForm().setVisible(true);
                 this.dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Update failed!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -458,7 +458,7 @@ try {
     }//GEN-LAST:event_usActionPerformed
 
     private void cancelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelMouseClicked
-        usersForm usf = new usersForm();
+        UsersForm usf = new UsersForm();
         usf.setVisible(true);
         this.dispose();        // TODO add your handling code here:
     }//GEN-LAST:event_cancelMouseClicked

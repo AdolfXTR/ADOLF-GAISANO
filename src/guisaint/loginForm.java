@@ -5,7 +5,9 @@
  */
 package guisaint;
 
-import admin.adminDashboard;
+import admin.Admins;
+import admin.bookedRooms;
+import config.Logs;
 import config.Session;
 import config.dbConnector;
 import java.awt.Color;
@@ -20,7 +22,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import users.usersDashboard;
+import users.User;
 /**
  *
  * @author Owner
@@ -200,8 +202,8 @@ public class loginForm extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         ext = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        user = new javax.swing.JTextField();
-        pass = new javax.swing.JPasswordField();
+        un = new javax.swing.JTextField();
+        ps = new javax.swing.JPasswordField();
         pazz = new javax.swing.JCheckBox();
         reg = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -256,19 +258,19 @@ public class loginForm extends javax.swing.JFrame {
         jLabel2.setText("Password");
         Main.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 210, 90, 40));
 
-        user.addActionListener(new java.awt.event.ActionListener() {
+        un.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                userActionPerformed(evt);
+                unActionPerformed(evt);
             }
         });
-        Main.add(user, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 160, 300, 50));
+        Main.add(un, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 160, 300, 50));
 
-        pass.addActionListener(new java.awt.event.ActionListener() {
+        ps.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                passActionPerformed(evt);
+                psActionPerformed(evt);
             }
         });
-        Main.add(pass, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 250, 300, 50));
+        Main.add(ps, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 250, 300, 50));
 
         pazz.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -332,21 +334,21 @@ public class loginForm extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void userActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userActionPerformed
+    private void unActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_userActionPerformed
+    }//GEN-LAST:event_unActionPerformed
 
     private void pazzActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pazzActionPerformed
        
         if(pazz.isSelected())
-            pass.setEchoChar((char)0);
+            ps.setEchoChar((char)0);
         else
-            pass.setEchoChar('*');
+            ps.setEchoChar('*');
     }//GEN-LAST:event_pazzActionPerformed
 
-    private void passActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passActionPerformed
+    private void psActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_psActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_passActionPerformed
+    }//GEN-LAST:event_psActionPerformed
 
     private void regMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_regMouseClicked
         
@@ -357,80 +359,49 @@ public class loginForm extends javax.swing.JFrame {
     }//GEN-LAST:event_regMouseClicked
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-  String username = user.getText();
-String password = new String(pass.getPassword());
+  String username = un.getText();
+String password = new String(ps.getPassword());
 dbConnector connector = new dbConnector();
 
 // Input validation
-if (username.isEmpty() && pass.getPassword().length == 0) {
+if (username.isEmpty() && ps.getPassword().length == 0) {
     JOptionPane.showMessageDialog(null, "All fields are required!");
 } else if (username.isEmpty()) {
     JOptionPane.showMessageDialog(null, "Username is required!");
-} else if (pass.getPassword().length == 0) {
+} else if (ps.getPassword().length == 0) {
     JOptionPane.showMessageDialog(null, "Password is required!");
-} else if (pass.getPassword().length < 8) {
+} else if (ps.getPassword().length < 8) {
     JOptionPane.showMessageDialog(null, "Password should have at least 8 characters.");
 } else {
-    if (loginAcc(username, password)) {
-        Session sess = Session.getInstance();
-        int userId = sess.getUid();
-
-        String status = "";
-        String type = "";
-
-        try {
-            // Get status and type from database
-            String query = "SELECT u_status, u_type FROM tbl_users WHERE u_username = ?";
-            PreparedStatement pstmt = connector.getConnection().prepareStatement(query);
-            pstmt.setString(1, username);
-
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                status = rs.getString("u_status");
-                type = rs.getString("u_type");
-            }
-
-            rs.close();
-            pstmt.close();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
-            return;
-        }
-
-        // Handle account status
-        if (!"Active".equalsIgnoreCase(status)) {
-            if ("Pending".equalsIgnoreCase(status)) {
-                JOptionPane.showMessageDialog(null, "Your account is still pending approval.");
-                logEvent(userId, username, "Failed - Pending Account");
-            } else {
-                JOptionPane.showMessageDialog(null, "Your account is inactive. Contact the administrator.");
-                logEvent(userId, username, "Failed - Inactive Account");
-            }
+    if(loginAcc(un.getText(), ps.getText())){
+        if(!status.equals("Active")){
+            JOptionPane.showMessageDialog(null, "In-Active Account, Contact the Admin!");
         } else {
-            // Login success, route to dashboard
-            if ("Admin".equalsIgnoreCase(type)) {
-                JOptionPane.showMessageDialog(null, "Login Success! Welcome Admin.");
-                logEvent(userId, username, "Success - Admin Login");
-                adminDashboard ads = new adminDashboard();
-                ads.setVisible(true);
+            JOptionPane.showMessageDialog(null, "Login Successfully!");
+
+            Logs.logFunctionCall(un.getText() + " logged in successfully");
+
+            if(type.equals("Admin")){
+                Admins usf= new Admins();
+                usf.setVisible(true);
                 this.dispose();
-            } else if ("Patient".equalsIgnoreCase(type) || "User".equalsIgnoreCase(type)) {
-                JOptionPane.showMessageDialog(null, "Login Success! Welcome User.");
-                logEvent(userId, username, "Success - User Login");
-                usersDashboard usd = new usersDashboard();
-                usd.setVisible(true);
+            } else if(type.equals("Receptionist")){
+                bookedRooms user = new bookedRooms();
+                
+                user.setVisible(true);
+                user.ApproveBooking.setEnabled(false);
+                user.jButton2.setEnabled(false);
                 this.dispose();
-            } else {
-                JOptionPane.showMessageDialog(null, "Unknown account type. Contact the administrator.");
-                logEvent(userId, username, "Failed - Unknown Account Type");
+            } else if(type.equals("Client")){
+                User user = new User();
+                user.setVisible(true);
+                this.dispose();
             }
         }
-
     } else {
-        JOptionPane.showMessageDialog(null, "Invalid username or password.");
-        logEvent(-1, username, "Failed - Invalid Login");
+        JOptionPane.showMessageDialog(null, "Login Unsuccessful!");
     }
-}
+}   
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -495,9 +466,9 @@ if (username.isEmpty() && pass.getPassword().length == 0) {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JPasswordField pass;
     private javax.swing.JCheckBox pazz;
+    private javax.swing.JPasswordField ps;
     private javax.swing.JLabel reg;
-    private javax.swing.JTextField user;
+    private javax.swing.JTextField un;
     // End of variables declaration//GEN-END:variables
 }

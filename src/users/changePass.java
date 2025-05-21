@@ -150,7 +150,7 @@ public class changePass extends javax.swing.JFrame {
     }//GEN-LAST:event_oldpassActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        Accountdetails ads = new Accountdetails();
+        addForm ads = new addForm();
         ads.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton2ActionPerformed
@@ -206,7 +206,7 @@ if (passw.isEmpty() || Cpassw.isEmpty() || oldPassInput.isEmpty()) {
                     int updated = updatePst.executeUpdate();
                     if (updated > 0) {
                         JOptionPane.showMessageDialog(null, "Password updated successfully");
-                        new usersDashboard().setVisible(true);
+                        new User().setVisible(true);
                         this.dispose();
                     } else {
                         JOptionPane.showMessageDialog(null, "Password update failed");

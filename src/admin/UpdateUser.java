@@ -6,7 +6,6 @@
 package admin;
 
 import guisaint.*;
-import admin.usersForm;
 import config.Session;
 import config.dbConnector;
 import config.passwordHasher;
@@ -29,6 +28,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import users.UsersForm;
 
 /**
  *
@@ -119,13 +119,14 @@ public class UpdateUser extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
+        jLabel9 = new javax.swing.JLabel();
+        cancel = new javax.swing.JButton();
+        refresh = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         add = new javax.swing.JButton();
         update = new javax.swing.JButton();
         delete = new javax.swing.JButton();
         clear = new javax.swing.JButton();
-        cancel = new javax.swing.JButton();
-        refresh = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         uid = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
@@ -153,46 +154,11 @@ public class UpdateUser extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(0, 102, 102));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 800, 70));
 
-        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        add.setBackground(new java.awt.Color(0, 102, 102));
-        add.setText("ADD");
-        add.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addActionPerformed(evt);
-            }
-        });
-        jPanel2.add(add, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, 70, -1));
-
-        update.setBackground(new java.awt.Color(0, 102, 102));
-        update.setText("UPDATE");
-        update.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                updateActionPerformed(evt);
-            }
-        });
-        jPanel2.add(update, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 20, -1, -1));
-
-        delete.setBackground(new java.awt.Color(0, 102, 102));
-        delete.setText("DELETE");
-        delete.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteActionPerformed(evt);
-            }
-        });
-        jPanel2.add(delete, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 20, -1, -1));
-
-        clear.setBackground(new java.awt.Color(0, 102, 102));
-        clear.setText("CLEAR");
-        clear.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                clearActionPerformed(evt);
-            }
-        });
-        jPanel2.add(clear, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 20, -1, -1));
+        jLabel9.setFont(new java.awt.Font("Arial Black", 1, 36)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel9.setText("UPDATE USER");
+        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
         cancel.setBackground(new java.awt.Color(0, 102, 102));
         cancel.setText("CANCEL");
@@ -201,7 +167,7 @@ public class UpdateUser extends javax.swing.JFrame {
                 cancelMouseClicked(evt);
             }
         });
-        jPanel2.add(cancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 20, -1, -1));
+        jPanel1.add(cancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 10, 80, -1));
 
         refresh.setBackground(new java.awt.Color(0, 102, 102));
         refresh.setText("REFRESH");
@@ -210,11 +176,56 @@ public class UpdateUser extends javax.swing.JFrame {
                 refreshActionPerformed(evt);
             }
         });
-        jPanel2.add(refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 20, -1, -1));
+        jPanel1.add(refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 40, 80, -1));
 
-        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 470, 70));
+
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        add.setBackground(new java.awt.Color(0, 102, 102));
+        add.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
+        add.setText("ADD");
+        add.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addActionPerformed(evt);
+            }
+        });
+        jPanel2.add(add, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 350, 270, 30));
+
+        update.setBackground(new java.awt.Color(0, 102, 102));
+        update.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
+        update.setText("UPDATE");
+        update.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateActionPerformed(evt);
+            }
+        });
+        jPanel2.add(update, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 390, 270, 30));
+
+        delete.setBackground(new java.awt.Color(0, 102, 102));
+        delete.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
+        delete.setText("DELETE");
+        delete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteActionPerformed(evt);
+            }
+        });
+        jPanel2.add(delete, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 430, 270, 30));
+
+        clear.setBackground(new java.awt.Color(0, 102, 102));
+        clear.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
+        clear.setText("CLEAR");
+        clear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearActionPerformed(evt);
+            }
+        });
+        jPanel2.add(clear, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 470, 270, 30));
+
+        jLabel1.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel1.setText("User ID:");
-        jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 100, -1, -1));
+        jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, -1, 30));
 
         uid.setEnabled(false);
         uid.addActionListener(new java.awt.event.ActionListener() {
@@ -222,31 +233,31 @@ public class UpdateUser extends javax.swing.JFrame {
                 uidActionPerformed(evt);
             }
         });
-        jPanel2.add(uid, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 100, 140, -1));
+        jPanel2.add(uid, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 10, 270, 30));
 
-        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel8.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel8.setText("First Name:");
-        jPanel2.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 140, -1, -1));
-        jPanel2.add(fn, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 140, 140, -1));
+        jPanel2.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 50, -1, 30));
+        jPanel2.add(fn, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 50, 270, 30));
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel2.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel2.setText("Last Name:");
-        jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 180, -1, -1));
-        jPanel2.add(ln, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 180, 140, -1));
+        jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, -1, 30));
+        jPanel2.add(ln, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 90, 270, 30));
 
-        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel3.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel3.setText("Email:");
-        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 220, -1, -1));
-        jPanel2.add(em, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 220, 140, -1));
+        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 130, -1, 30));
+        jPanel2.add(em, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 130, 270, 30));
 
-        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel4.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel4.setText("Username:");
-        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 260, -1, -1));
-        jPanel2.add(un, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 260, 140, -1));
+        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 170, -1, 30));
+        jPanel2.add(un, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 170, 270, 30));
 
-        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel5.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel5.setText("Password:");
-        jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 300, -1, -1));
+        jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 210, -1, 30));
 
         ps.setEnabled(false);
         ps.addActionListener(new java.awt.event.ActionListener() {
@@ -254,18 +265,18 @@ public class UpdateUser extends javax.swing.JFrame {
                 psActionPerformed(evt);
             }
         });
-        jPanel2.add(ps, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 300, 140, -1));
+        jPanel2.add(ps, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 210, 270, 30));
 
-        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel6.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel6.setText("Account Type:");
-        jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 340, -1, -1));
+        jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 260, -1, 30));
 
         ut.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Admin", "User" }));
-        jPanel2.add(ut, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 340, 80, 20));
+        jPanel2.add(ut, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 260, 270, 30));
 
-        jLabel7.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel7.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel7.setText("User Status:");
-        jPanel2.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 380, -1, -1));
+        jPanel2.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 300, -1, 30));
 
         us.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Active", "Pending" }));
         us.addActionListener(new java.awt.event.ActionListener() {
@@ -273,11 +284,12 @@ public class UpdateUser extends javax.swing.JFrame {
                 usActionPerformed(evt);
             }
         });
-        jPanel2.add(us, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 380, 80, -1));
+        jPanel2.add(us, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 300, 270, 30));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, 760, 460));
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 70, 470, 520));
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addActionPerformed
@@ -343,7 +355,7 @@ pst.setString(7, type);  // Fix: Add Account Type (u_type)
         int rowsInserted = pst.executeUpdate();
         if (rowsInserted > 0) {
             JOptionPane.showMessageDialog(null, "Registered Successfully!");
-            new usersForm().setVisible(true);
+            new UsersForm().setVisible(true);
             this.dispose();
         } else {
             JOptionPane.showMessageDialog(null, "Registration Failed!");
@@ -431,7 +443,7 @@ try {
 
     if (updated > 0) {
         JOptionPane.showMessageDialog(this, "User updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-        new usersForm().setVisible(true);
+        new UsersForm().setVisible(true);
         this.dispose();
     } else {
         JOptionPane.showMessageDialog(this, "Update failed! Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -469,7 +481,7 @@ try {
     }//GEN-LAST:event_usActionPerformed
 
     private void cancelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelMouseClicked
-        usersForm usf = new usersForm();
+        UsersForm usf = new UsersForm();
         usf.setVisible(true);
         this.dispose();        // TODO add your handling code here:
     }//GEN-LAST:event_cancelMouseClicked
@@ -537,6 +549,7 @@ try {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     public javax.swing.JTextField ln;
